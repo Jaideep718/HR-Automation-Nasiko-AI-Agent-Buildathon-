@@ -1,0 +1,206 @@
+# HR Automation – Full stack.
+# Run from repo root:  docker compose up --build
+#
+# Copy .env.example to .env and fill in your values before running.
+#
+# Port layout (host):
+#   5000 — Master Orchestrator  ← single public entry point
+#   5001 — HR Helpdesk Agent
+#   5002 — Onboarding Agent
+#   5003 — Resume Shortlisting Agent
+#   5004 — Attendance Agent
+#   5005 — Offboarding Agent
+#   5006 — Payroll Agent
+
+services:
+
+  # ── WORKER AGENTS (started first) ─────────────────────────────────────────
+
+  hr-helpdesk-agent:
+    build: ./hr-helpdesk-agent
+    container_name: hr-helpdesk-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_INDEX=${PINECONE_INDEX}
+      - PINECONE_FAQ_INDEX=${PINECONE_FAQ_INDEX}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5001:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  onboarding-agent:
+    build: ./onboarding-agent
+    container_name: onboarding-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SMTP_EMAIL=${SMTP_EMAIL}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - REMINDER_DAYS=${REMINDER_DAYS}
+    ports:
+      - "5002:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  resume-shortlisting-agent:
+    build: ./resume-shortlisting-agent
+    container_name: resume-shortlisting-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+    ports:
+      - "5003:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  attendance-agent:
+    build: ./attendance-agent
+    container_name: attendance-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - EMAIL_USER=${SMTP_EMAIL}
+      - EMAIL_PASS=${SMTP_PASSWORD}
+    ports:
+      - "5004:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  offboarding-agent:
+    build: ./offboarding-agent
+    container_name: offboarding-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SMTP_EMAIL=${SMTP_EMAIL}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - HR_EMAIL=${HR_EMAIL}
+      - COMPANY_NAME=${COMPANY_NAME}
+    ports:
+      - "5005:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
+  payroll-agent:
+    build: ./payroll-agent
+    container_name: payroll-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    ports:
+      - "5006:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── ORCHESTRATOR – waits for all workers to be healthy ────────────────────
+
+  master-orchestrator-agent:
+    build: ./master-orchestrator-agent
+    container_name: master-orchestrator-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - HR_HELPDESK_URL=http://hr-helpdesk-agent:5000
+      - ONBOARDING_AGENT_URL=http://onboarding-agent:5000
+      - RESUME_SHORTLIST_URL=http://resume-shortlisting-agent:5000
+      - ATTENDANCE_AGENT_URL=http://attendance-agent:5000
+      - OFFBOARDING_AGENT_URL=http://offboarding-agent:5000
+      - PAYROLL_AGENT_URL=http://payroll-agent:5000
+      - AGENT_TIMEOUT=120
+    ports:
+      - "5000:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      hr-helpdesk-agent:
+        condition: service_healthy
+      onboarding-agent:
+        condition: service_healthy
+      resume-shortlisting-agent:
+        condition: service_healthy
+      attendance-agent:
+        condition: service_healthy
+      offboarding-agent:
+        condition: service_healthy
+      payroll-agent:
+        condition: service_healthy
+
+networks:
+  agents-net:
+    driver: bridge
