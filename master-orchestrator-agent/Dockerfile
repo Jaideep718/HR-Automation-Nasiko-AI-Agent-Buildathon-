@@ -1,23 +1,19 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements first for better caching
+# Install dependencies first (better layer caching)
 COPY requirements.txt .
-
-# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
-COPY src/ ./src/
-COPY AgentCard.json .
+COPY src/ /app
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
 
 # Expose port
 EXPOSE 5000
 
 # Run the agent
-CMD ["python", "-m", "src"]
+CMD ["python", "__main__.py", "--host", "0.0.0.0", "--port", "5000"]
