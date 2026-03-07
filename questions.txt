@@ -48,3 +48,14 @@ List all HR policies I can ask about.
 
 
 I want to escalate a dispute with my manager. My name is John. The issue is about project responsibilities and communication, which has caused stress and confusion. Please create an escalation ticket for HR to mediate and help resolve this.
+
+
+Questions:- 
+
+FAQ Questions:- What are the company holidays for 2026?
+Policy - What is the leave policy for employees?
+escalate_to_hr - I want to escalate a dispute with my manager. My name is John Doe. The issue is about project responsibilities and communication, which has caused stress and confusion. Please create an escalation ticket for HR to mediate and help resolve this. My email is cs23bt018@iitdh.ac.in
+check_ticket_status - What is the status of my HR escalation ticket HR-20260308-B5F6C00F?
+
+process_department_payroll:- Process payroll for the Engineering department for March 2026.
+list_departments:- List all departments in the company.

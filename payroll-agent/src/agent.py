@@ -55,26 +55,15 @@ class Agent:
             list_departments
         ]
         
-        # Configure the LLM
+        # Configure the LLM (OpenAI)
         LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
-        HF_BASE_URL = os.getenv("HF_BASE_URL", "https://api-inference.huggingface.co/v1")
-        HF_TOKEN = os.getenv("HF_TOKEN")
         OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
         
-        # Use HuggingFace if token is provided, otherwise use OpenAI
-        if HF_TOKEN:
-            self.llm = ChatOpenAI(
-                model=LLM_MODEL,
-                api_key=HF_TOKEN,
-                base_url=HF_BASE_URL,
-                temperature=0.3,
-            )
-        else:
-            self.llm = ChatOpenAI(
-                model=LLM_MODEL,
-                api_key=OPENAI_API_KEY,
-                temperature=0.3,
-            )
+        self.llm = ChatOpenAI(
+            model=LLM_MODEL,
+            api_key=OPENAI_API_KEY,
+            temperature=0.3,
+        )
         
         # System prompt defining the Payroll agent's personality and instructions
         system_message = """You are the Payroll Automation Agent, an AI-powered assistant responsible for managing employee payroll calculations, generating payslips, and providing payroll reports.

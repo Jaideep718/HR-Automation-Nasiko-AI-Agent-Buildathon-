@@ -61,13 +61,11 @@ class Agent:
             list_hr_policy_topics
         ]
         
-        # Configure the LLM (HuggingFace)
-        LLM_MODEL = os.getenv("LLM_MODEL", "your-default-model")
-        HF_BASE_URL = os.getenv("HF_BASE_URL", "https://api-inference.huggingface.co/v1")
+        # Configure the LLM (OpenAI)
+        LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
         self.llm = ChatOpenAI(
             model=LLM_MODEL,
-            api_key=os.getenv("HF_TOKEN"),
-            base_url=HF_BASE_URL,
+            api_key=os.getenv("OPENAI_API_KEY"),
             temperature=0.7,
         )
         

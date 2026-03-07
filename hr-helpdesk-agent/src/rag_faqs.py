@@ -13,8 +13,7 @@ from langchain_openai import ChatOpenAI
 load_dotenv()
 
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-LLM_MODEL = os.getenv("LLM_MODEL", "deepseek-ai/DeepSeek-V3")
-HF_BASE_URL = os.getenv("HF_BASE_URL", "https://router.huggingface.co/v1")
+LLM_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
 
 embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
 
@@ -25,8 +24,7 @@ vectorstore = PineconeVectorStore.from_existing_index(
 
 llm = ChatOpenAI(
     model=LLM_MODEL,
-    api_key=os.getenv("HF_TOKEN"),
-    base_url=HF_BASE_URL,
+    api_key=os.getenv("OPENAI_API_KEY"),
     temperature=0,
 )
 
