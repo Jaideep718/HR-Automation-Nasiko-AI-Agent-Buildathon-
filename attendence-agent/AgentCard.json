@@ -1,0 +1,34 @@
+{
+    "protocolVersion": "0.2.9",
+    "name": "HR Attendance Automation Agent",
+    "description": "AI agent that manages employee attendance, leave requests, work hours, and absenteeism tracking.",
+    "url": "http://localhost:5000/",
+    "preferredTransport": "JSONRPC",
+    "provider": {
+      "organization": "Hackathon Team",
+      "url": "https://github.com/your-repo/hr-attendance-agent"
+    },
+    "version": "1.0.0",
+    "capabilities": {
+      "streaming": false,
+      "pushNotifications": false,
+      "stateTransitionHistory": true,
+      "chat_agent": true
+    },
+    "defaultInputModes": ["text/plain"],
+    "defaultOutputModes": ["text/plain"],
+    "skills": [
+      {
+        "name": "leave_management",
+        "description": "Handles employee leave requests"
+      },
+      {
+        "name": "attendance_tracking",
+        "description": "Tracks employee work hours and absenteeism"
+      },
+      {
+        "name": "attendance_reporting",
+        "description": "Generates attendance reports"
+      }
+    ]
+  }
