@@ -20,6 +20,7 @@ HR_HELPDESK_URL = os.getenv("HR_HELPDESK_URL", "http://hr-helpdesk-agent:5000")
 ONBOARDING_AGENT_URL = os.getenv("ONBOARDING_AGENT_URL", "http://onboarding-agent:5000")
 RESUME_SHORTLIST_URL = os.getenv("RESUME_SHORTLIST_URL", "http://resume-shortlisting-agent:5000")
 ATTENDANCE_AGENT_URL = os.getenv("ATTENDANCE_AGENT_URL", "http://attendance-agent:5000")
+PAYROLL_AGENT_URL = os.getenv("PAYROLL_AGENT_URL", "http://payroll-agent:5000")
 
 # Timeout for agent requests (seconds)
 AGENT_TIMEOUT = int(os.getenv("AGENT_TIMEOUT", "120"))
@@ -174,6 +175,36 @@ def route_to_attendance(query: str) -> str:
 
 
 @tool
+def route_to_payroll(query: str) -> str:
+    """
+    Route payroll-related queries to the Payroll Automation Agent.
+    Use this for:
+    - Calculating employee salaries and payroll
+    - Generating payslips for employees
+    - Processing department-wide payroll
+    - Getting payroll summaries and reports
+    - Adding bonuses or salary adjustments
+    - Checking payroll processing status
+    - Tax calculation queries
+    
+    Example queries:
+    - "Calculate payroll for EMP12345 for March 2026"
+    - "Generate payslip for Rahul Sharma for February 2026"
+    - "Process payroll for the Engineering department for March 2026"
+    - "Show payroll summary for March 2026"
+    - "Add a bonus of 10000 to EMP12345 for March 2026"
+    
+    Args:
+        query: The payroll-related request
+        
+    Returns:
+        Response from the Payroll Agent
+    """
+    logger.info(f"Routing to Payroll Agent: {query[:100]}...")
+    return _call_worker_agent(PAYROLL_AGENT_URL, query)
+
+
+@tool
 def list_available_agents() -> str:
     """
     List all available worker agents and their capabilities.
@@ -210,6 +241,14 @@ def list_available_agents() -> str:
    - Generate attendance reports
    - Track overtime and leave balances
 
+5. **Payroll Automation Agent** (for HR/Finance)
+   - Calculate employee salaries and payroll
+   - Generate detailed payslips
+   - Process department-wide payroll
+   - Create payroll summaries and reports
+   - Handle bonuses and salary adjustments
+   - Tax calculation (old and new regime)
+
 **How to use:** Simply describe what you need, and I'll route your request to the appropriate agent.
 """
 
@@ -222,7 +261,7 @@ def check_agent_health(agent_name: str) -> str:
     
     Args:
         agent_name: Name of the agent to check. 
-                    Options: "helpdesk", "onboarding", "resume", "attendance"
+                    Options: "helpdesk", "onboarding", "resume", "attendance", "payroll"
                     
     Returns:
         Health status of the specified agent
@@ -231,11 +270,12 @@ def check_agent_health(agent_name: str) -> str:
         "helpdesk": HR_HELPDESK_URL,
         "onboarding": ONBOARDING_AGENT_URL,
         "resume": RESUME_SHORTLIST_URL,
-        "attendance": ATTENDANCE_AGENT_URL
+        "attendance": ATTENDANCE_AGENT_URL,
+        "payroll": PAYROLL_AGENT_URL
     }
     
     if agent_name.lower() not in agent_urls:
-        return f"Unknown agent: {agent_name}. Available options: helpdesk, onboarding, resume, attendance"
+        return f"Unknown agent: {agent_name}. Available options: helpdesk, onboarding, resume, attendance, payroll"
     
     url = agent_urls[agent_name.lower()]
     health_endpoint = f"{url}/health"

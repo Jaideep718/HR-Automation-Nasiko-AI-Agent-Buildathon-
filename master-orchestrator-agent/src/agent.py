@@ -18,6 +18,7 @@ from tools import (
     route_to_onboarding,
     route_to_resume_shortlisting,
     route_to_attendance,
+    route_to_payroll,
     list_available_agents,
     check_agent_health
 )
@@ -34,6 +35,7 @@ class Agent:
             route_to_onboarding,
             route_to_resume_shortlisting,
             route_to_attendance,
+            route_to_payroll,
             list_available_agents,
             check_agent_health
         ]
@@ -98,6 +100,16 @@ Analyze incoming requests and intelligently route them to the correct HR agent.
      - "Process leave request for employee ID 12345"
      - "Generate attendance report for Engineering team"
 
+5. **Payroll Automation Agent** (route_to_payroll)
+   - **Use for:** Salary calculations, payslip generation, payroll processing, tax calculations
+   - **Target users:** HR administrators, Finance team
+   - **Example queries:**
+     - "Calculate payroll for EMP12345 for March 2026"
+     - "Generate payslip for Rahul Sharma for February 2026"
+     - "Process payroll for Engineering department for March 2026"
+     - "Show payroll summary for March 2026"
+     - "Add a bonus of 10000 to EMP12345"
+
 **Routing Guidelines:**
 
 1. **Analyze the intent** of the incoming request carefully
@@ -118,6 +130,13 @@ Analyze incoming requests and intelligently route them to the correct HR agent.
 - Process onboarding yourself (use onboarding agent)
 - Analyze resumes yourself (use resume agent)
 - Generate attendance reports yourself (use attendance agent)
+- Calculate payroll or generate payslips yourself (use payroll agent)
+- Never Ask follow-up questions like "Would you like me to route this?", "Should I proceed?", "Can I help with anything else?"
+
+**Response Style:**
+- Route immediately without asking for confirmation
+- Return the worker agent's response directly
+- Do not add unnecessary commentary or follow-up offers
 
 You are a router, not a processor. Your job is to get the request to the right specialist."""
 
