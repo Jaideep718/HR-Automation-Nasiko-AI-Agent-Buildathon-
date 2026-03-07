@@ -45,7 +45,8 @@ leave_requests = [
     {"employee_email": "alice@company.com", "days": 2, "status": "pending","created_at": datetime.utcnow().isoformat()},
     {"employee_email": "bob@company.com", "days": 1, "status": "pending","created_at": datetime.utcnow().isoformat()},
     {"employee_email": "dksrishi007@gmail.com", "days": 2, "status": "pending","created_at": datetime.utcnow().isoformat()},
-    {"employee_email": "mc23bt003@iitdh.ac.in", "days": 1, "status": "pending","created_at": datetime.utcnow().isoformat()}
+    {"employee_email": "mc23bt003@iitdh.ac.in", "days": 1, "status": "pending","created_at": datetime.utcnow().isoformat()},
+    {"employee_email": "mc23bt004@iitdh.ac.in", "days": 1, "status": "pending","created_at": datetime.utcnow().isoformat()},
 ]
 
 supabase.table("leave_requests").insert(leave_requests).execute()

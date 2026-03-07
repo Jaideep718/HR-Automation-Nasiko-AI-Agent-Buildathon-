@@ -14,6 +14,7 @@ import os
 
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from googleapiclient.http import BatchHttpRequest
 
@@ -214,12 +215,13 @@ def get_calendar_service():
         creds = Credentials.from_authorized_user_file(token_path, SCOPES)
 
     if not creds or not creds.valid:
-
-        flow = InstalledAppFlow.from_client_secrets_file(
-            creds_path, SCOPES
-        )
-
-        creds = flow.run_local_server(port=0)
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                creds_path, SCOPES
+            )
+            creds = flow.run_local_server(port=0)
 
         with open(token_path, "w") as token:
             token.write(creds.to_json())
@@ -357,9 +359,10 @@ def send_welcome_email(employee_id: str) -> str:
             f"Your reporting manager will be <b>{emp['manager']}</b>.</p>"
         )
         if schedule:
+            schedule_html = ''.join(f'{e["time"]} - {e["event"]}<br>' for e in schedule)
             body += (
                 f"<p><b>Your first day schedule:</b><br>"
-                f"{''.join(f'{e["time"]} - {e["event"]}<br>' for e in schedule)}"
+                f"{schedule_html}"
                 f"</p>"
             )
         else:
@@ -504,7 +507,15 @@ def update_document_status(employee_id: str, document_name: str, status: str) ->
         _documents[employee_id][document_name] = status
         _save_document_to_db(employee_id, document_name, status)
 
-        return f"Document '{document_name}' for {_employees[employee_id]['name']} updated to '{status}'."
+        msg = f"Document '{document_name}' for {_employees[employee_id]['name']} updated to '{status}'."
+
+        # Auto-schedule orientation once all documents are uploaded
+        docs = _documents.get(employee_id, {})
+        if all(v == "uploaded" for v in docs.values()) and not _schedules.get(employee_id):
+            result = schedule_orientation.invoke({"employee_id": employee_id})
+            msg += f"\n\n{result}"
+
+        return msg
     except Exception as e:
         return f"Error updating document status: {str(e)}"
 

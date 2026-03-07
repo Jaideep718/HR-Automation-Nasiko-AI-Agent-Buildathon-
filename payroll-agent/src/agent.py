@@ -62,7 +62,7 @@ class Agent:
         self.llm = ChatOpenAI(
             model=LLM_MODEL,
             api_key=OPENAI_API_KEY,
-            temperature=0.3,
+            temperature=0.1,
         )
         
         # System prompt defining the Payroll agent's personality and instructions

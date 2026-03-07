@@ -22,7 +22,7 @@ services:
       dockerfile: hr-helpdesk-agent/Dockerfile
     container_name: hr-helpdesk-agent
     environment:
-      - OPENAI_API_KEY=${HELPDESK_OPENAI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - LLM_MODEL=${LLM_MODEL}
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_INDEX=${PINECONE_INDEX}
@@ -60,6 +60,7 @@ services:
       - SMTP_PASSWORD=${ONBOARD_SMTP_PASSWORD}
       - REMINDER_DAYS=${REMINDER_DAYS}
       - HR_EMAIL=${HR_EMAIL}
+      - UPLOAD_BASE_URL=http://localhost:5002/onboarding/upload
     ports:
       - "5002:5000"
     networks:
