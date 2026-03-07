@@ -133,7 +133,7 @@ async def handle_rpc(request: JsonRpcRequest):
 
 @click.command()
 @click.option("--host", default="localhost", help="Host to bind to")
-@click.option("--port", default=5003, help="Port to bind to")
+@click.option("--port", default=5000, help="Port to bind to")
 def main(host: str, port: int):
     """Run the Payroll Automation Agent server."""
     logger.info(f"Starting Payroll Automation Agent on {host}:{port}")

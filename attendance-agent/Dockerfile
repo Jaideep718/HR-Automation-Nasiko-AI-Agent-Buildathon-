@@ -4,8 +4,6 @@ WORKDIR /app
 
 COPY src/ /app
 
-COPY credentials.json /app/credentials.json
-
 RUN pip install --no-cache-dir \
   fastapi>=0.109.0 \
     uvicorn>=0.27.0 \

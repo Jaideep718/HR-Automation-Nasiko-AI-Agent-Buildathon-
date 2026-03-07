@@ -10,7 +10,7 @@ services:
       - SUPABASE_KEY=${SUPABASE_KEY}
     stdin_open: true
     ports:
-      - "5003:5003"
+      - "5006:5000"
     tty: true
     networks:
       - agents-net
@@ -21,7 +21,7 @@ services:
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:5003/health')",
+          "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')",
         ]
       interval: 30s
       timeout: 10s

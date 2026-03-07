@@ -12,10 +12,11 @@ services:
       - RESUME_SHORTLIST_URL=http://resume-shortlisting-agent:5000
       - ATTENDANCE_AGENT_URL=http://attendance-agent:5000
       - OFFBOARDING_AGENT_URL=http://offboarding-agent:5000
+      - PAYROLL_AGENT_URL=http://payroll-agent:5000
       - AGENT_TIMEOUT=120
     stdin_open: true
     ports:
-      - "5000"
+      - "5000:5000"
     tty: true
     networks:
       - agents-net
@@ -38,6 +39,7 @@ services:
       - resume-shortlisting-agent
       - attendance-agent
       - offboarding-agent
+      - payroll-agent
 
   hr-helpdesk-agent:
     build: ../hr-helpdesk-agent
@@ -144,6 +146,10 @@ services:
       - HF_TOKEN=${HF_TOKEN}
       - HF_BASE_URL=${HF_BASE_URL}
       - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - EMAIL_USER=${SMTP_EMAIL}
+      - EMAIL_PASS=${SMTP_PASSWORD}
     stdin_open: true
     ports:
       - "5004:5000"
@@ -195,6 +201,36 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+
+  payroll-agent:
+    build: ../payroll-agent
+    container_name: payroll-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    stdin_open: true
+    ports:
+      - "5006:5000"
+    tty: true
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 networks:
   agents-net:

@@ -13,7 +13,7 @@ COPY src/ /app
 ENV PYTHONUNBUFFERED=1
 
 # Expose port
-EXPOSE 5003
+EXPOSE 5000
 
 # Run the agent
-CMD ["python", "__main__.py", "--host", "0.0.0.0", "--port", "5003"]
+CMD ["python", "__main__.py", "--host", "0.0.0.0", "--port", "5000"]
