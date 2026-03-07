@@ -1,0 +1,70 @@
+{
+    "protocolVersion": "0.2.9",
+    "name": "Resume Shortlisting Agent",
+    "description": "Automates resume parsing, candidate scoring against job requirements, filtering top candidates, and scheduling interviews via email.",
+    "url": "http://localhost:5000/",
+    "preferredTransport": "JSONRPC",
+    "provider": {
+        "organization": "Nasiko AI Projects",
+        "url": "https://github.com/Jaideep718/HR-Automation-Nasiko-AI-Agent-Buildathon-"
+    },
+    "iconUrl": "http://localhost:5000/icon.png",
+    "version": "1.0.0",
+    "documentationUrl": "http://localhost:5000/docs",
+    "capabilities": {
+        "streaming": false,
+        "pushNotifications": false,
+        "stateTransitionHistory": true,
+        "chat_agent": true
+    },
+    "securitySchemes": {},
+    "security": [],
+    "defaultInputModes": [
+        "text/plain"
+    ],
+    "defaultOutputModes": [
+        "text/plain"
+    ],
+    "skills": [
+        {
+            "name": "extract_job_role",
+            "description": "Extract the job role from user input"
+        },
+        {
+            "name": "generate_required_skills",
+            "description": "Generate a list of required skills for a given job role"
+        },
+        {
+            "name": "read_spreadsheet",
+            "description": "Read candidate data from a spreadsheet URL"
+        },
+        {
+            "name": "download_resume",
+            "description": "Download a resume from a given URL"
+        },
+        {
+            "name": "extract_resume_text",
+            "description": "Extract text content from a PDF resume"
+        },
+        {
+            "name": "extract_resume_details",
+            "description": "Extract structured details (name, email, skills, experience) from resume text"
+        },
+        {
+            "name": "score_candidate",
+            "description": "Score a candidate against required skills for a job role"
+        },
+        {
+            "name": "filter_candidates",
+            "description": "Filter and rank candidates by score, returning the top shortlisted candidates"
+        },
+        {
+            "name": "schedule_interview",
+            "description": "Schedule an interview for a shortlisted candidate"
+        },
+        {
+            "name": "send_interview_email",
+            "description": "Send an interview invitation email to a candidate"
+        }
+    ]
+}

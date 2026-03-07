@@ -176,12 +176,17 @@ def send_document_reminder(employee_id: str) -> str:
     upload_link = f"{UPLOAD_BASE_URL}?employee_id={employee_id}"
 
     subject = f"Reminder: {len(pending)} document(s) still pending - {emp['name']}"
+    doc_list = ''.join(f'<li>{d}</li>' for d in pending)
+    if days_left <= 7:
+        days_display = '<span style="color:red">' + str(days_left) + ' days left</span>'
+    else:
+        days_display = str(days_left) + ' days left'
     body = (
         f"<p>Hi {emp['name']},</p>"
         f"<p>This is a friendly reminder that the following documents are still pending:</p>"
-        f"<ul>{''.join(f'<li>{d}</li>' for d in pending)}</ul>"
+        f"<ul>{doc_list}</ul>"
         f"<p>Your start date is <b>{emp['start_date']}</b> "
-        f"({'<span style=\"color:red\">' + str(days_left) + ' days left</span>' if days_left <= 7 else str(days_left) + ' days left'}).</p>"
+        f"({days_display}).</p>"
         f"<p>Please upload them <a href='{upload_link}' style='color: #1a73e8; font-weight: bold;'>here</a>.</p>"
         f"<p>Best regards,<br><b>HR Team</b></p>"
     )

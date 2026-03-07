@@ -20,6 +20,7 @@ HR_HELPDESK_URL = os.getenv("HR_HELPDESK_URL", "http://hr-helpdesk-agent:5000")
 ONBOARDING_AGENT_URL = os.getenv("ONBOARDING_AGENT_URL", "http://onboarding-agent:5000")
 RESUME_SHORTLIST_URL = os.getenv("RESUME_SHORTLIST_URL", "http://resume-shortlisting-agent:5000")
 ATTENDANCE_AGENT_URL = os.getenv("ATTENDANCE_AGENT_URL", "http://attendance-agent:5000")
+OFFBOARDING_AGENT_URL = os.getenv("OFFBOARDING_AGENT_URL", "http://offboarding-agent:5000")
 PAYROLL_AGENT_URL = os.getenv("PAYROLL_AGENT_URL", "http://payroll-agent:5000")
 
 # Timeout for agent requests (seconds)
@@ -205,6 +206,34 @@ def route_to_payroll(query: str) -> str:
 
 
 @tool
+def route_to_offboarding(query: str) -> str:
+    """
+    Route offboarding requests to the Offboarding Agent.
+    Use this for:
+    - Processing employee resignations and terminations
+    - Tracking return of company assets (laptop, ID card, etc.)
+    - Scheduling exit interviews
+    - Revoking system access for departing employees
+    - Knowledge transfer assignments
+    - Final settlement and HR notifications
+    - Checking offboarding status for an employee
+
+    Example queries:
+    - "Offboard employee Rahul Sharma, email rahul@company.com, last working day 2026-04-15"
+    - "Check asset return status for offboarding ID OFF-12345"
+    - "Schedule exit interview for departing employee"
+
+    Args:
+        query: The offboarding request with employee details
+
+    Returns:
+        Response from the Offboarding Agent
+    """
+    logger.info(f"Routing to Offboarding Agent: {query[:100]}...")
+    return _call_worker_agent(OFFBOARDING_AGENT_URL, query)
+
+
+@tool
 def list_available_agents() -> str:
     """
     List all available worker agents and their capabilities.
@@ -241,7 +270,15 @@ def list_available_agents() -> str:
    - Generate attendance reports
    - Track overtime and leave balances
 
-5. **Payroll Automation Agent** (for HR/Finance)
+5. **Offboarding Agent** (for HR Administrators)
+   - Process employee resignations and terminations
+   - Track return of company assets
+   - Schedule exit interviews
+   - Revoke system access
+   - Assign knowledge transfer to successors
+   - Final settlement notifications
+
+6. **Payroll Automation Agent** (for HR/Finance)
    - Calculate employee salaries and payroll
    - Generate detailed payslips
    - Process department-wide payroll
@@ -261,7 +298,7 @@ def check_agent_health(agent_name: str) -> str:
     
     Args:
         agent_name: Name of the agent to check. 
-                    Options: "helpdesk", "onboarding", "resume", "attendance", "payroll"
+                    Options: "helpdesk", "onboarding", "resume", "attendance", "offboarding", "payroll"
                     
     Returns:
         Health status of the specified agent
@@ -271,11 +308,12 @@ def check_agent_health(agent_name: str) -> str:
         "onboarding": ONBOARDING_AGENT_URL,
         "resume": RESUME_SHORTLIST_URL,
         "attendance": ATTENDANCE_AGENT_URL,
+        "offboarding": OFFBOARDING_AGENT_URL,
         "payroll": PAYROLL_AGENT_URL
     }
     
     if agent_name.lower() not in agent_urls:
-        return f"Unknown agent: {agent_name}. Available options: helpdesk, onboarding, resume, attendance, payroll"
+        return f"Unknown agent: {agent_name}. Available options: helpdesk, onboarding, resume, attendance, offboarding, payroll"
     
     url = agent_urls[agent_name.lower()]
     health_endpoint = f"{url}/health"

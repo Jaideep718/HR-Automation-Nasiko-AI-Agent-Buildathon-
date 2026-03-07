@@ -18,6 +18,7 @@ from tools import (
     route_to_onboarding,
     route_to_resume_shortlisting,
     route_to_attendance,
+    route_to_offboarding,
     route_to_payroll,
     list_available_agents,
     check_agent_health
@@ -35,6 +36,7 @@ class Agent:
             route_to_onboarding,
             route_to_resume_shortlisting,
             route_to_attendance,
+            route_to_offboarding,
             route_to_payroll,
             list_available_agents,
             check_agent_health
@@ -100,7 +102,15 @@ Analyze incoming requests and intelligently route them to the correct HR agent.
      - "Process leave request for employee ID 12345"
      - "Generate attendance report for Engineering team"
 
-5. **Payroll Automation Agent** (route_to_payroll)
+5. **Offboarding Agent** (route_to_offboarding)
+   - **Use for:** Employee resignations, terminations, asset return tracking, exit interviews, access revocation, knowledge transfer
+   - **Target users:** HR administrators
+   - **Example queries:**
+     - "Offboard employee Rahul Sharma, email rahul@company.com, last working day 2026-04-15"
+     - "Check asset return status for offboarding OFF-12345"
+     - "Schedule exit interview for departing employee"
+
+6. **Payroll Automation Agent** (route_to_payroll)
    - **Use for:** Salary calculations, payslip generation, payroll processing, tax calculations
    - **Target users:** HR administrators, Finance team
    - **Example queries:**
@@ -131,6 +141,7 @@ Analyze incoming requests and intelligently route them to the correct HR agent.
 - Analyze resumes yourself (use resume agent)
 - Generate attendance reports yourself (use attendance agent)
 - Calculate payroll or generate payslips yourself (use payroll agent)
+- Handle offboarding or exit processes yourself (use offboarding agent)
 - Never Ask follow-up questions like "Would you like me to route this?", "Should I proceed?", "Can I help with anything else?"
 
 **Response Style:**
