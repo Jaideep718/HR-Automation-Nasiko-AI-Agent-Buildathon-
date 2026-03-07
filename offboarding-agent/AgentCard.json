@@ -1,0 +1,63 @@
+{
+  "protocolVersion": "0.2.9",
+  "name": "Employee Offboarding Agent",
+  "description": "Automates the employee offboarding lifecycle — from resignation processing and notice period calculation to asset return tracking, exit interviews, knowledge transfer, access revocation, and final settlement.",
+  "url": "http://localhost:5000/",
+  "preferredTransport": "JSONRPC",
+  "provider": {
+    "organization": "Nasiko AI Projects",
+    "url": "https://github.com/Jaideep718/HR-Automation-Nasiko-AI-Agent-Buildathon-"
+  },
+  "iconUrl": "http://localhost:5000/icon.png",
+  "version": "1.0.0",
+  "documentationUrl": "http://localhost:5000/docs",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true,
+    "chat_agent": true
+  },
+  "securitySchemes": {},
+  "security": [],
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
+  "skills": [
+    {
+      "name": "initiate_offboarding",
+      "description": "Register a resignation, calculate notice period and shortfall, and set up asset tracking"
+    },
+    {
+      "name": "send_exit_notification",
+      "description": "Send the departing employee an exit notification email with timeline and checklist"
+    },
+    {
+      "name": "track_assets",
+      "description": "Check the return status of all company assets (laptop, ID card, access card, etc.)"
+    },
+    {
+      "name": "update_asset_status",
+      "description": "Mark a specific company asset as returned or lost"
+    },
+    {
+      "name": "schedule_exit_interview",
+      "description": "Schedule a confidential exit interview and notify both parties"
+    },
+    {
+      "name": "revoke_access",
+      "description": "Flag all system access for revocation and notify IT/HR"
+    },
+    {
+      "name": "assign_knowledge_transfer",
+      "description": "Assign a knowledge transfer handover to a successor with deadline"
+    },
+    {
+      "name": "notify_hr_final_settlement",
+      "description": "Notify HR to process final settlement including notice shortfall and asset deductions"
+    },
+    {
+      "name": "get_offboarding_status",
+      "description": "Get a comprehensive summary of the offboarding case"
+    }
+  ],
+  "supportsAuthenticatedExtendedCard": false
+}

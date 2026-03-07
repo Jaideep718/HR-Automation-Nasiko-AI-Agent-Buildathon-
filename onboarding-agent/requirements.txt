@@ -1,0 +1,26 @@
+# Web framework
+fastapi
+uvicorn
+
+# Data validation
+pydantic
+
+# LangChain / LangGraph
+langchain
+langchain-core
+langchain-openai
+langgraph
+
+# Google APIs (Gmail / Calendar)
+google-api-python-client
+google-auth
+google-auth-oauthlib
+
+# Supabase
+supabase
+
+# Utilities
+python-multipart
+python-dotenv
+click
+requests

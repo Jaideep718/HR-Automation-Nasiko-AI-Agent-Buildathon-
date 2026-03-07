@@ -53,6 +53,9 @@ logs/
 .DS_Store
 Thumbs.db
 desktop.ini
+__MACOSX/
+._*
+*.pdf
 
 # ===========================
 # Data files (may contain PII)

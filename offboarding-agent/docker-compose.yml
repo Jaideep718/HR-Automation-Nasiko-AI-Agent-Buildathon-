@@ -1,0 +1,38 @@
+services:
+  offboarding-agent:
+    build: .
+    container_name: offboarding-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SMTP_EMAIL=${SMTP_EMAIL}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - HR_EMAIL=${HR_EMAIL}
+      - COMPANY_NAME=${COMPANY_NAME}
+    stdin_open: true
+    ports:
+      - "5000"
+    tty: true
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+networks:
+  agents-net:
+    external: true

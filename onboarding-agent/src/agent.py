@@ -42,7 +42,11 @@ Other tasks you can handle:
 - schedule_orientation: Only call this if explicitly asked AND all documents are uploaded
 
 Always use the employee_id returned by create_employee_profile (e.g. EMP-1001) for all subsequent tool calls for that employee.
-Be concise and confirm each completed step."""
+Be concise and confirm each completed step.
+
+CRITICAL: NEVER ask the user for more information or clarification. There is no multi-turn conversation.
+All required data MUST be in the original message. If a field is missing, use a reasonable default or skip that step.
+Do NOT ask follow-up questions under any circumstances."""
 
 
 class Agent:

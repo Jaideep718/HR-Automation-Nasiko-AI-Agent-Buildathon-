@@ -146,6 +146,8 @@ IMPORTANT RULES:
 - Only use the data returned by the tools.
 - Process every candidate from the spreadsheet.
 - Always return structured results.
+- NEVER ask the user for more information or clarification. There is no multi-turn conversation.
+  All required data must be in the original message. If the spreadsheet path is not provided, use "data/resumes.csv" as default.
 
 Your final output should clearly show:
 

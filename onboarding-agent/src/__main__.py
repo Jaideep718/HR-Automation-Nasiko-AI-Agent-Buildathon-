@@ -32,9 +32,9 @@ agent = Agent()
 # Background: Auto-send document reminders
 # ---------------------------------------------------------------------------
 async def reminder_loop():
-    """Check every hour for employees with pending docs past the reminder threshold."""
+    """Check every 6 hours for employees with pending docs past the reminder threshold."""
     while True:
-        await asyncio.sleep(3600)  # check every hour
+        await asyncio.sleep(21600)  # check every 6 hours
         now = datetime.now()
         for emp_id, emp in list(_employees.items()):
             docs = _documents.get(emp_id, {})
