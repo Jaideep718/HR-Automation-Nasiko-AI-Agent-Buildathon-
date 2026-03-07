@@ -137,7 +137,7 @@ services:
       start_period: 10s
 
   attendance-agent:
-    build: ../attendence-agent
+    build: ../attendance-agent
     container_name: attendance-agent
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
