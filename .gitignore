@@ -57,6 +57,12 @@ __MACOSX/
 ._*
 *.pdf
 
+# Hackathon template files (not part of our project)
+a2a-translator/
+agent-template/
+sample-weather-agent/
+HACKATHON_AGENT_GUIDE.md
+
 # ===========================
 # Data files (may contain PII)
 # ===========================
