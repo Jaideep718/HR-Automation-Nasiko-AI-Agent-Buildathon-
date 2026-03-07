@@ -1,0 +1,16 @@
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+src/venv/
+src/.venv/
+*.egg-info
+.git
+.gitignore
+.DS_Store
+README.md
+docker-compose.yml
