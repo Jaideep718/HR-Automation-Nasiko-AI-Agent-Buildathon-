@@ -12,13 +12,82 @@ from dotenv import load_dotenv
 from pypdf import PdfReader
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
+from openai import OpenAI
+import numpy as np
 
 load_dotenv()
+client = OpenAI()
+
 
 # ---------- LLM INITIALIZATION ----------
 
 llm = ChatOpenAI(model="gpt-4o", temperature=0)
+SKILL_ALIASES = {
+    "machine learning": ["ml"],
+    "deep learning": ["dl"],
+    "natural language processing": ["nlp"],
+    "artificial intelligence": ["ai"],
+    "computer vision": ["cv"],
 
+    "static timing analysis": ["sta"],
+    "design for testability": ["dft"],
+    "register transfer level": ["rtl"],
+
+    "javascript": ["js"],
+    "typescript": ["ts"],
+    "node.js": ["node"],
+
+    "amazon web services": ["aws"],
+    "google cloud platform": ["gcp"],
+
+    "structured query language": ["sql"],
+}
+
+# ---------- NORMALIZE SKILL ----------
+
+def normalize_skill(skill):
+    """
+    Convert skill shortcuts to canonical form
+    Example: NLP -> natural language processing
+    """
+
+    skill = skill.lower().strip()
+
+    for canonical, aliases in SKILL_ALIASES.items():
+        if skill == canonical or skill in aliases:
+            return canonical
+
+    return skill
+# ---------- EMBEDDING CACHE ----------
+
+EMBED_CACHE = {}
+
+
+def get_embedding(skill):
+    """
+    Get embedding vector for a skill with caching
+    """
+
+    if skill in EMBED_CACHE:
+        return EMBED_CACHE[skill]
+
+    emb = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=skill
+    ).data[0].embedding
+
+    EMBED_CACHE[skill] = emb
+
+    return emb
+def similarity(skill1, skill2):
+    """
+    Compute semantic similarity between two skills
+    """
+
+    emb1 = np.array(get_embedding(skill1))
+    emb2 = np.array(get_embedding(skill2))
+
+    return np.dot(emb1, emb2) / (np.linalg.norm(emb1) * np.linalg.norm(emb2))
 
 # ---------- STEP 1: EXTRACT JOB ROLE ----------
 
@@ -51,18 +120,28 @@ def generate_required_skills(job_role: str) -> str:
     """
 
     prompt = f"""
-List the important technical skills required for a {job_role}.
+List the most important technical skills required for a {job_role}.
+
+Rules:
+- Return ONLY the top 8 technical skills
+- Each skill must be a single item
+- Do NOT group skills inside parentheses
+- Do NOT include explanations
 
 Return JSON format:
 
 {{
 "job_role": "{job_role}",
- "skills": []
+"skills": []
 }}
 """
 
     response = llm.invoke(prompt)
-
+    print("\n==============================")
+    print("Job Role:", job_role)
+    print("LLM Generated Skills JSON:")
+    print(response.content)
+    print("==============================\n")
     return response.content
 
 
@@ -197,12 +276,10 @@ Resume:
     return json.dumps(candidate)
 
 # ---------- STEP 7: SCORE CANDIDATE ----------
-
 @tool
 def score_candidate(candidate_json: str, role_skills_json: str) -> str:
     """
-    Score candidate based on skill similarity and experience.
-    Works for any role.
+    Score candidate based on skill match + semantic similarity + experience
     """
 
     import json
@@ -210,18 +287,38 @@ def score_candidate(candidate_json: str, role_skills_json: str) -> str:
 
     candidate = json.loads(candidate_json)
     role_skills = json.loads(role_skills_json)
+
     candidate["job_role"] = role_skills.get("job_role") or "Position"
 
     candidate_skills = candidate.get("skills", [])
-    required_skills = role_skills.get("skills", [])
+    required_skills_raw = role_skills.get("skills", [])
 
-    candidate_skills = [s.lower() for s in candidate_skills]
-    required_skills = [s.lower() for s in required_skills]
+    # ---------- EXPAND GROUPED SKILLS ----------
+
+    expanded_required_skills = []
+
+    for skill in required_skills_raw:
+
+        if "(" in skill and ")" in skill:
+            inside = skill.split("(")[1].split(")")[0]
+            parts = [p.strip() for p in inside.split(",")]
+            expanded_required_skills.extend(parts)
+
+        else:
+            expanded_required_skills.append(skill)
+
+    required_skills = expanded_required_skills
+
+    # ---------- NORMALIZE ----------
+
+    candidate_skills = [normalize_skill(s) for s in candidate_skills]
+    required_skills = [normalize_skill(s) for s in required_skills]
 
     score = 0
     matched_skills = []
 
-    # Skill matching
+    # ---------- MATCHING ----------
+
     for req in required_skills:
 
         req_clean = re.sub(r"[^a-z0-9 ]", "", req)
@@ -230,14 +327,28 @@ def score_candidate(candidate_json: str, role_skills_json: str) -> str:
 
             cand_clean = re.sub(r"[^a-z0-9 ]", "", cand)
 
-            if req_clean in cand_clean or cand_clean in req_clean:
-
+            # exact match
+            if req_clean == cand_clean:
                 score += 2
                 matched_skills.append(cand)
                 break
 
-    # Experience scoring
-    experience = candidate.get("experience", 0)
+            # semantic match
+            try:
+                sim = similarity(req_clean, cand_clean)
+            except Exception:
+                sim = 0
+
+
+
+            if sim > 0.75:
+                score += 2
+                matched_skills.append(cand)
+                break
+
+    # ---------- EXPERIENCE ----------
+
+        experience = candidate.get("experience", 0)
 
     if experience >= 4:
         score += 3
@@ -248,34 +359,65 @@ def score_candidate(candidate_json: str, role_skills_json: str) -> str:
 
     candidate["matched_skills"] = matched_skills
     candidate["score"] = score
-    print("Candidate score:", candidate["score"], candidate["name"])
-    return json.dumps(candidate)
 
+    report = f"""
+############################################
+        CANDIDATE SCORING REPORT
+############################################
+Candidate Name : {candidate["name"]}
+Target Role    : {candidate["job_role"]}
+
+Candidate Skills:
+{candidate_skills}
+
+Required Skills:
+{required_skills}
+
+Matched Skills:
+{matched_skills}
+
+Experience:
+{experience}
+
+Final Score:
+{score}
+############################################
+"""
+
+    print(report)
+
+    return json.dumps(candidate)
 
 # ---------- STEP 8: FILTER SHORTLISTED CANDIDATES ----------
 @tool
 def filter_candidates(candidate_json: str, threshold: int = 6) -> str:
-        """
-        Determine whether a candidate should be shortlisted or rejected
-        based on the computed score and threshold.
-        """
-        candidate = json.loads(candidate_json)
+    """
+    Determine whether a candidate should be shortlisted or rejected
+    based on the computed score and threshold.
+    """
 
-        if "score" not in candidate:
-            return json.dumps(candidate)
+    import json
 
-        score = candidate["score"]
+    candidate = json.loads(candidate_json)
 
-        if score >= threshold:
-            candidate["status"] = "shortlisted"
-        else:
-            candidate["status"] = "rejected"
-
-        if not candidate.get("email_sent"):
-            send_interview_email.invoke(json.dumps(candidate))
-            candidate["email_sent"] = True
-
+    if "score" not in candidate:
         return json.dumps(candidate)
+
+    score = candidate["score"]
+
+    if score >= threshold:
+        candidate["status"] = "shortlisted"
+
+    else:
+        candidate["status"] = "rejected"
+
+        # send rejection email immediately
+        send_interview_email.invoke(json.dumps(candidate))
+        candidate["email_sent"] = True
+
+    print(f"Candidate {candidate['name']} | Score: {score} | Status: {candidate['status']}")
+
+    return json.dumps(candidate)
 
 
 # ---------- STEP 9: SCHEDULE INTERVIEW ----------
@@ -364,24 +506,33 @@ def send_interview_email(candidate_json: str) -> str:
         subject = "Interview Invitation"
 
         body = f"""
-Dear {candidate['name']},
+<html>
+<body>
+<p>Dear {candidate['name']},</p>
 
-Congratulations! 🎉
+<p><b>Congratulations! 🎉</b></p>
 
-You have been shortlisted for the next stage of our recruitment process.
+<p>You have been shortlisted for the next stage of our recruitment process.</p>
 
-Interview Details
------------------
-Role: {candidate.get("job_role","Position")}
-Time: {candidate.get("interview_time")}
-Duration: 30 minutes
+<p><b>Interview Details</b></p>
 
-Please be available at the scheduled time.
+<ul>
+<li><b>Role:</b> {candidate.get("job_role","Position")}</li>
+<li><b>Time:</b> {candidate.get("interview_time")}</li>
+<li><b>Duration:</b> 30 minutes</li>
+</ul>
 
-We look forward to speaking with you.
+<p>Please be available at the scheduled time.</p>
 
-Best regards,
+<p>We look forward to speaking with you.</p>
+
+<p>
+Best regards,<br>
 HR Team
+</p>
+
+</body>
+</html>
 """
 
     # ---------- REJECTION EMAIL ----------
@@ -390,18 +541,23 @@ HR Team
         subject = "Application Update"
 
         body = f"""
-Dear {candidate['name']},
+<html>
+<body>
+<p>Dear {candidate['name']},</p>
 
-Thank you for taking the time to apply for the position with us.
+<p>Thank you for applying for the position with us.</p>
 
-After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.
+<p>After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.</p>
 
-We truly appreciate your interest in our company and encourage you to apply again in the future if a suitable opportunity arises.
+<p>We appreciate your interest in our company and encourage you to apply again in the future.</p>
 
-We wish you all the best in your career journey.
-
-Kind regards,
+<p>
+Best regards,<br>
 HR Team
+</p>
+
+</body>
+</html>
 """
 
     msg = MIMEMultipart()
@@ -409,14 +565,19 @@ HR Team
     msg["To"] = receiver_email
     msg["Subject"] = subject
 
-    msg.attach(MIMEText(body, "plain"))
+    msg.attach(MIMEText(body, "html"))
 
     server = smtplib.SMTP("smtp.gmail.com", 587)
     server.starttls()
 
     server.login(sender_email, sender_password)
 
+    print("\n----------------------------------")
+    print("Candidate:", candidate.get("name"))
+    print("Final Score:", candidate.get("score"))
+    print("Status:", candidate.get("status"))
     print("Sending email to:", receiver_email)
+    print("----------------------------------")
 
     server.sendmail(sender_email, receiver_email, msg.as_string())
 
