@@ -1,0 +1,17 @@
+Topic: Organization Chart and Company Structure
+Category: Company Information
+
+Q: Where can I find the organization chart?
+A: The organization chart is available on the company intranet at https://intranet.company.com under "About Us" > "Our Team". It is updated monthly by the HR team.
+
+Q: How do I find out who my skip-level manager is?
+A: The org chart on the intranet shows the full reporting hierarchy. You can also ask your direct manager or contact HR at hr@company.com for clarification.
+
+Q: How are departments structured?
+A: The company is organized into the following main departments: Engineering, Product, Sales, Marketing, Finance, Human Resources, Legal, and Operations. Each department is led by a Vice President who reports to the C-suite.
+
+Q: How do I find a colleague's contact information?
+A: Employee contact information, including email addresses and phone extensions, is available in the company directory on the intranet under "Directory". You can search by name, department, or location.
+
+Q: Who do I contact if the org chart is out of date?
+A: Please email hr@company.com if you notice any inaccuracies in the organization chart. Org chart updates are processed within 5 business days of a confirmed organizational change.

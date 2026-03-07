@@ -1,0 +1,45 @@
+{
+  "protocolVersion": "0.2.9",
+  "name": "HR Helpdesk Agent",
+  "description": "An AI-powered HR helpdesk agent that answers employee policy questions, provides FAQ responses, and escalates complex issues to human HR representatives. Covers leave policies, benefits, remote work, expenses, onboarding, performance reviews, code of conduct, and resignation procedures.",
+  "url": "http://localhost:5000/",
+  "preferredTransport": "JSONRPC",
+  "provider": {
+    "organization": "HR Automation Team",
+    "url": "https://github.com/hr-automation/hr-helpdesk-agent"
+  },
+  "iconUrl": "http://localhost:5000/icon.png",
+  "version": "1.0.0",
+  "documentationUrl": "http://localhost:5000/docs",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true,
+    "chat_agent": true
+  },
+  "securitySchemes": {},
+  "security": [],
+  "skills": [
+    {
+      "id": "policy-search",
+      "name": "HR Policy Search",
+      "description": "Search and retrieve company HR policies including leave, benefits, remote work, expenses, onboarding, performance reviews, code of conduct, and resignation procedures."
+    },
+    {
+      "id": "faq-answers",
+      "name": "FAQ Quick Answers",
+      "description": "Provide quick answers to frequently asked HR questions about passwords, payroll, vacation balance, org chart, and holiday schedules."
+    },
+    {
+      "id": "issue-escalation",
+      "name": "Issue Escalation",
+      "description": "Escalate complex or sensitive HR issues to human HR representatives with ticket tracking."
+    },
+    {
+      "id": "ticket-status",
+      "name": "Ticket Status Check",
+      "description": "Check the status of existing HR escalation tickets."
+    }
+  ],
+  "supportsAuthenticatedExtendedCard": false
+}

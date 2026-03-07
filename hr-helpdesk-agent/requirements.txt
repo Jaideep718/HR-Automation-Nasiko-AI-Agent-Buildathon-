@@ -1,0 +1,15 @@
+langchain-openai
+langchain-core
+langchain
+langchain-community
+langchain-pinecone
+langchain-huggingface
+pinecone-client
+sentence-transformers
+pymupdf
+fastapi
+uvicorn
+click
+pydantic
+python-dotenv
+supabase

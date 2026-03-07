@@ -1,0 +1,35 @@
+# Combined requirements for all HR Automation agents
+# Install once: pip install -r requirements.txt
+
+# LangChain core
+langchain-openai
+langchain-core
+langchain
+langchain-community
+langchain-pinecone
+langchain-huggingface
+
+# LangGraph (for agent loops)
+langgraph
+
+# Vector DB & Embeddings
+pinecone-client
+sentence-transformers
+
+# Document parsing
+pymupdf
+
+# HTTP client (for master orchestrator routing)
+httpx
+
+# Web framework
+fastapi
+uvicorn
+click
+
+# Data & config
+pydantic
+python-dotenv
+
+# Database
+supabase

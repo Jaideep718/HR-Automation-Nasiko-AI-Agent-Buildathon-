@@ -1,0 +1,55 @@
+{
+  "protocolVersion": "0.2.9",
+  "name": "HR Master Orchestrator Agent",
+  "description": "Master orchestrator agent that intelligently routes HR requests to specialized worker agents. Manages HR Helpdesk (employee queries), Onboarding (new hires), Resume Shortlisting (recruitment), and Attendance Automation agents.",
+  "url": "http://localhost:5000/",
+  "preferredTransport": "JSONRPC",
+  "provider": {
+    "organization": "HR Automation Team",
+    "url": "https://github.com/hr-automation/master-orchestrator-agent"
+  },
+  "iconUrl": "http://localhost:5000/icon.png",
+  "version": "1.0.0",
+  "documentationUrl": "http://localhost:5000/docs",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true,
+    "chat_agent": true
+  },
+  "securitySchemes": {},
+  "security": [],
+  "skills": [
+    {
+      "id": "request-routing",
+      "name": "Intelligent Request Routing",
+      "description": "Analyzes incoming HR requests and routes them to the most appropriate specialized worker agent."
+    },
+    {
+      "id": "helpdesk-routing",
+      "name": "HR Helpdesk Routing",
+      "description": "Routes employee queries about policies, FAQs, issue escalations, and ticket status to the HR Helpdesk Agent."
+    },
+    {
+      "id": "onboarding-routing",
+      "name": "Onboarding Routing",
+      "description": "Routes new employee onboarding requests to the Onboarding Agent for HR administrators."
+    },
+    {
+      "id": "resume-routing",
+      "name": "Resume Shortlisting Routing",
+      "description": "Routes candidate screening and resume analysis requests to the Resume Shortlisting Agent."
+    },
+    {
+      "id": "attendance-routing",
+      "name": "Attendance Routing",
+      "description": "Routes attendance tracking, time-off, and leave management requests to the Attendance Automation Agent."
+    },
+    {
+      "id": "agent-health-check",
+      "name": "Agent Health Monitoring",
+      "description": "Checks the health and availability status of worker agents."
+    }
+  ],
+  "supportsAuthenticatedExtendedCard": false
+}

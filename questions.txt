@@ -1,0 +1,50 @@
+FAQ Questions
+
+How do I reset my password?
+When is the next payday?
+How can I check my vacation balance?
+Who do I contact in HR?
+What are the company holidays for 2026?
+How do I enroll in benefits?
+What should I do on my first day?
+Where can I find the organization chart?
+
+
+Policy Questions
+
+What is the leave policy for employees?
+Can I work remotely and what are the guidelines?
+How does expense reimbursement work?
+What is the process for performance reviews?
+What is the code of conduct?
+How do I resign from the company?
+What are the rules for overtime pay?
+What is the policy for carrying over unused vacation days?
+
+escalate_to_hr
+
+I want to report a workplace complaint.
+I need to escalate a dispute with my manager.
+I have a grievance about my salary.
+I need special accommodation for medical reasons.
+I want to escalate a harassment issue.
+My leave situation is complex and needs HR review.
+
+
+check_ticket_status
+
+What is the status of my HR escalation ticket HR-20260307-ABC12345?
+Can you check the progress of my ticket HR-20260307-XYZ98765?
+Is my complaint ticket still open?
+When will HR respond to my escalation?
+
+
+list_hr_policy_topics
+
+What HR policy topics are available?
+Show me all company policies.
+What documents are in the HR database?
+List all HR policies I can ask about.
+
+
+I want to escalate a dispute with my manager. My name is John. The issue is about project responsibilities and communication, which has caused stress and confusion. Please create an escalation ticket for HR to mediate and help resolve this.

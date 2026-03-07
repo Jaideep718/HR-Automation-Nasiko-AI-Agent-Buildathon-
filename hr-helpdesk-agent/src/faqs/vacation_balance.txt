@@ -1,0 +1,26 @@
+Topic: Vacation and PTO Balance
+Category: Time Off / Leave
+
+Q: How do I check my vacation balance?
+A: Log into the HR Portal and navigate to "Time Off" > "Balances". You will see your current vacation, sick leave, and personal day balances. If you see any discrepancies, contact hr@company.com.
+
+Q: How much vacation time do I accrue?
+A: Vacation accrual is based on years of service:
+- 0-2 years: 10 days (80 hours) per year
+- 3-5 years: 15 days (120 hours) per year
+- 6-10 years: 20 days (160 hours) per year
+- 10+ years: 25 days (200 hours) per year
+
+Vacation is accrued at an equal rate per pay period throughout the year.
+
+Q: Can I carry over unused vacation days?
+A: Employees may carry over up to 5 vacation days (40 hours) into the next calendar year. Any unused days beyond this limit will be forfeited on December 31st.
+
+Q: How do I request time off?
+A: Submit time off requests through the HR Portal under "Time Off" > "Request Time Off". Requests should be submitted at least 2 weeks in advance for planned vacations. Your manager will approve or deny the request within 3 business days.
+
+Q: Can I cash out unused vacation?
+A: Vacation cash-out is permitted once per year during the annual election period in November, up to 5 days (40 hours). Contact payroll@company.com for details.
+
+Q: What is PTO and how is it different from vacation?
+A: PTO (Paid Time Off) is a combined bank of vacation, sick leave, and personal days for eligible employees. Some legacy roles track these separately. Check your HR Portal to see which plan applies to you.
