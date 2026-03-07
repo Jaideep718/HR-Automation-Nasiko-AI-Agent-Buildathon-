@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
-# ✅ Fix #9: Load environment variables from .env file
+# Load environment variables from .env file
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -26,10 +26,14 @@ EMAIL_PASS = os.getenv("EMAIL_PASS")
 TOTAL_WORKING_DAYS = 22
 
 
+# ------------------------------------------------
+# HELPERS
+# ------------------------------------------------
+
 def send_email(to_email: str, subject: str, message: str) -> bool:
     """
     Send email notification to employee.
-    ✅ Fix #8: Returns True/False so callers know if email succeeded.
+    Returns True/False so callers know if email succeeded.
     """
     try:
         msg = MIMEMultipart()
@@ -52,19 +56,55 @@ def send_email(to_email: str, subject: str, message: str) -> bool:
 
 def fetch_pending_requests() -> list:
     """
-    ✅ Fix #1 & #5: Single shared helper that always returns pending requests
-    in a consistent, stable order (ordered by created_at ascending).
-    Both view and approve/reject by number use this same function,
-    so the numbering shown to HR always matches what the tools act on.
+    Shared helper — returns pending leave requests in stable order (oldest first).
+    Both view and approve/reject-by-number use this so numbering is always consistent.
     """
     response = (
         supabase.table("leave_requests")
-        .select("id, days, employee_email, employees(name), created_at")
+        .select("id, days, employee_email, employees(name, email), created_at")
         .eq("status", "pending")
         .order("created_at", desc=False)
         .execute()
     )
     return response.data or []
+
+
+def format_duplicate_employees(matches: list) -> str:
+    """
+    Format duplicate-named employees into a numbered list for HR disambiguation.
+    Uses email as the unique identifier since it is the primary key.
+    """
+    result = ""
+    for i, e in enumerate(matches, start=1):
+        result += (
+            f"  {i}. Email: {e['email']}"
+            f" | Working Days: {e.get('working_days', 'N/A')}"
+            f" | Absent Days: {e.get('absent_days', 'N/A')}\n"
+        )
+    result += "\nPlease reply with the employee's email to proceed."
+    return result
+
+
+def lookup_employees_by_name(name: str) -> list:
+    """Case-insensitive employee lookup by name. Returns all matches."""
+    response = (
+        supabase.table("employees")
+        .select("name, email, working_days, absent_days")
+        .ilike("name", name.strip())
+        .execute()
+    )
+    return response.data or []
+
+
+def lookup_employee_by_email(email: str) -> dict | None:
+    """Fetch a single employee record by email (primary key). Returns None if not found."""
+    response = (
+        supabase.table("employees")
+        .select("name, email, working_days, absent_days")
+        .eq("email", email.strip().lower())
+        .execute()
+    )
+    return response.data[0] if response.data else None
 
 
 # ------------------------------------------------
@@ -75,7 +115,7 @@ def fetch_pending_requests() -> list:
 def view_leave_requests() -> str:
     """
     Show all pending leave requests including employee name and email.
-    Requests are numbered in a stable order (oldest first) so that
+    Requests are numbered in stable order (oldest first) so that
     approve/reject by number works reliably.
     """
     requests = fetch_pending_requests()
@@ -88,7 +128,7 @@ def view_leave_requests() -> str:
         name = r["employees"]["name"]
         days = r["days"]
         email = r["employee_email"]
-        result += f"{i}. {name.title()} ({email}) – {days} day(s)\n"
+        result += f"  {i}. {name.title()} ({email}) – {days} day(s)\n"
 
     return result
 
@@ -100,16 +140,15 @@ def view_leave_requests() -> str:
 @tool
 def approve_leave(employee: str) -> str:
     """
-    Approve a leave request using employee name.
-    If multiple employees share the same name, the system will ask HR
-    to choose the request number from the pending list.
+    Approve a pending leave request by employee name.
+    If multiple employees share the same name, HR will be shown
+    the numbered pending list and asked to pick a request number.
     """
     employee = employee.lower()
 
-    # ✅ Fix #3: Use ilike for case-insensitive name matching
     response = (
         supabase.table("leave_requests")
-        .select("id, days, employee_email, employees(name)")
+        .select("id, days, employee_email, employees(name, email)")
         .eq("status", "pending")
         .execute()
     )
@@ -120,7 +159,7 @@ def approve_leave(employee: str) -> str:
     ]
 
     if not matches:
-        return f"No pending leave request for {employee.title()}."
+        return f"No pending leave request found for '{employee.title()}'."
 
     if len(matches) == 1:
         r = matches[0]
@@ -148,11 +187,10 @@ HR Department"""
         note = "" if sent else " (Note: email notification could not be sent)"
         return f"Leave approved for {name.title()}.{note}"
 
-    # Multiple matches — ask HR to pick by number
-    result = f"Multiple employees named {employee.title()} have pending leave requests:\n"
+    result = f"Multiple employees named '{employee.title()}' have pending leave requests:\n"
     for i, r in enumerate(matches, start=1):
-        result += f"{i}. {r['employees']['name'].title()} ({r['employee_email']}) – {r['days']} day(s)\n"
-    result += "\nPlease view all pending requests with their numbers and specify which request number to approve."
+        result += f"  {i}. {r['employees']['name'].title()} ({r['employee_email']}) – {r['days']} day(s)\n"
+    result += "\nPlease run 'view leave requests' to see the full numbered list, then specify the request number to approve."
     return result
 
 
@@ -163,12 +201,9 @@ HR Department"""
 @tool
 def approve_leave_by_number(number: int) -> str:
     """
-    Approve a leave request using the numbered request list previously shown.
+    Approve a leave request using the numbered list shown by view_leave_requests.
     Example: 'approve request 2'.
-    Numbers match the list shown by view_leave_requests.
     """
-    # ✅ Fix #1 & #2: Use the same stable fetch so numbering is consistent;
-    # no redundant second DB query — all data is already in the first fetch.
     requests = fetch_pending_requests()
 
     if not requests:
@@ -210,7 +245,7 @@ HR Department"""
 @tool
 def reject_leave(employee: str, reason: str = "Not specified") -> str:
     """
-    Reject a leave request using employee name.
+    Reject a pending leave request by employee name.
     If multiple employees share the same name, HR will be asked
     to select the request number.
     """
@@ -218,7 +253,7 @@ def reject_leave(employee: str, reason: str = "Not specified") -> str:
 
     response = (
         supabase.table("leave_requests")
-        .select("id, days, employee_email, employees(name)")
+        .select("id, days, employee_email, employees(name, email)")
         .eq("status", "pending")
         .execute()
     )
@@ -229,7 +264,7 @@ def reject_leave(employee: str, reason: str = "Not specified") -> str:
     ]
 
     if not matches:
-        return f"No pending leave request for {employee.title()}."
+        return f"No pending leave request found for '{employee.title()}'."
 
     if len(matches) == 1:
         r = matches[0]
@@ -258,10 +293,10 @@ HR Department"""
         note = "" if sent else " (Note: email notification could not be sent)"
         return f"Leave rejected for {name.title()}.{note}"
 
-    result = f"Multiple employees named {employee.title()} have pending leave requests:\n"
+    result = f"Multiple employees named '{employee.title()}' have pending leave requests:\n"
     for i, r in enumerate(matches, start=1):
-        result += f"{i}. {r['employees']['name'].title()} ({r['employee_email']}) – {r['days']} day(s)\n"
-    result += "\nPlease view all pending requests with their numbers and specify which request number to reject."
+        result += f"  {i}. {r['employees']['name'].title()} ({r['employee_email']}) – {r['days']} day(s)\n"
+    result += "\nPlease run 'view leave requests' to see the full numbered list, then specify the request number to reject."
     return result
 
 
@@ -275,7 +310,6 @@ def reject_leave_by_number(number: int, reason: str = "Not specified") -> str:
     Reject a leave request using the numbered list shown by view_leave_requests.
     Example: 'reject request 1 because project deadline'.
     """
-    # ✅ Fix #2 & #6: Single fetch, no redundant second query
     requests = fetch_pending_requests()
 
     if not requests:
@@ -312,37 +346,107 @@ HR Department"""
 
 
 # ------------------------------------------------
-# ATTENDANCE
+# TRACK WORKING DAYS — BY NAME
 # ------------------------------------------------
 
 @tool
 def track_working_days(employee: str) -> str:
-    """Get the number of working days recorded for an employee."""
-    # ✅ Fix #3: Use ilike for case-insensitive name matching
-    emp = supabase.table("employees") \
-        .select("*") \
-        .ilike("name", employee.strip()) \
-        .execute()
+    """
+    Get the number of working days recorded for an employee by name.
+    If multiple employees share the same name, a disambiguation list
+    is shown with their emails. HR can then use track_working_days_by_email.
+    """
+    matches = lookup_employees_by_name(employee)
 
-    if not emp.data:
+    if not matches:
         return f"Employee '{employee.title()}' not found."
 
-    return f"{emp.data[0]['name'].title()} has worked {emp.data[0]['working_days']} day(s) this month."
+    if len(matches) > 1:
+        result = f"Multiple employees named '{employee.title()}' found:\n"
+        result += format_duplicate_employees(matches)
+        return result
 
+    e = matches[0]
+    return (
+        f"{e['name'].title()} ({e['email']}) has worked {e['working_days']} day(s) "
+        f"out of {TOTAL_WORKING_DAYS} this month."
+    )
+
+
+# ------------------------------------------------
+# TRACK WORKING DAYS — BY EMAIL  (duplicate-name fallback)
+# ------------------------------------------------
+
+@tool
+def track_working_days_by_email(employee_email: str) -> str:
+    """
+    Get working days for a specific employee using their email (primary key).
+    Use this after track_working_days returns multiple employees with the same name.
+    Example: 'check working days for rishi@company.com'
+    """
+    e = lookup_employee_by_email(employee_email)
+
+    if not e:
+        return f"No employee found with email '{employee_email}'."
+
+    return (
+        f"{e['name'].title()} ({e['email']}) has worked {e['working_days']} day(s) "
+        f"out of {TOTAL_WORKING_DAYS} this month."
+    )
+
+
+# ------------------------------------------------
+# MONITOR ABSENTEEISM — BY NAME
+# ------------------------------------------------
 
 @tool
 def monitor_absenteeism(employee: str) -> str:
-    """Check how many days an employee has been absent."""
-    # ✅ Fix #3: Use ilike for case-insensitive name matching
-    emp = supabase.table("employees") \
-        .select("*") \
-        .ilike("name", employee.strip()) \
-        .execute()
+    """
+    Check how many days an employee has been absent, looked up by name.
+    If multiple employees share the same name, a disambiguation list
+    is shown with their emails. HR can then use monitor_absenteeism_by_email.
+    """
+    matches = lookup_employees_by_name(employee)
 
-    if not emp.data:
+    if not matches:
         return f"Employee '{employee.title()}' not found."
 
-    return f"{emp.data[0]['name'].title()} has been absent {emp.data[0]['absent_days']} day(s) this month."
+    if len(matches) > 1:
+        result = f"Multiple employees named '{employee.title()}' found:\n"
+        result += format_duplicate_employees(matches)
+        return result
+
+    e = matches[0]
+    rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100 if TOTAL_WORKING_DAYS > 0 else 0.0
+
+    return (
+        f"{e['name'].title()} ({e['email']}) has been absent {e['absent_days']} day(s) "
+        f"this month (Attendance rate: {rate:.1f}%)."
+    )
+
+
+# ------------------------------------------------
+# MONITOR ABSENTEEISM — BY EMAIL  (duplicate-name fallback)
+# ------------------------------------------------
+
+@tool
+def monitor_absenteeism_by_email(employee_email: str) -> str:
+    """
+    Check absence days for a specific employee using their email (primary key).
+    Use this after monitor_absenteeism returns multiple employees with the same name.
+    Example: 'check absences for rishi.k@company.com'
+    """
+    e = lookup_employee_by_email(employee_email)
+
+    if not e:
+        return f"No employee found with email '{employee_email}'."
+
+    rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100 if TOTAL_WORKING_DAYS > 0 else 0.0
+
+    return (
+        f"{e['name'].title()} ({e['email']}) has been absent {e['absent_days']} day(s) "
+        f"this month (Attendance rate: {rate:.1f}%)."
+    )
 
 
 # ------------------------------------------------
@@ -352,23 +456,21 @@ def monitor_absenteeism(employee: str) -> str:
 @tool
 def get_attendance_report() -> str:
     """Generate a full attendance report for all employees."""
-    employees = supabase.table("employees").select("*").execute().data
+    employees = supabase.table("employees") \
+        .select("name, email, working_days, absent_days") \
+        .execute().data
 
     if not employees:
         return "No employee records found."
 
     report = "Attendance Report:\n"
-    report += f"{'Employee':<20} {'Working Days':>12} {'Absent Days':>12} {'Attendance %':>13}\n"
-    report += "-" * 60 + "\n"
+    report += f"{'Employee':<22} {'Email':<30} {'Working Days':>13} {'Absent Days':>12} {'Attendance %':>13}\n"
+    report += "-" * 95 + "\n"
 
     for e in employees:
-        # ✅ Fix #4: Guard against division by zero
-        if TOTAL_WORKING_DAYS > 0:
-            rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100
-        else:
-            rate = 0.0
+        rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100 if TOTAL_WORKING_DAYS > 0 else 0.0
         report += (
-            f"{e['name'].title():<20} {e['working_days']:>12} "
+            f"{e['name'].title():<22} {e['email']:<30} {e['working_days']:>13} "
             f"{e['absent_days']:>12} {rate:>12.1f}%\n"
         )
 
@@ -378,23 +480,20 @@ def get_attendance_report() -> str:
 @tool
 def detect_absenteeism() -> str:
     """Detect employees with poor attendance (absent > 3 days or attendance rate < 80%)."""
-    employees = supabase.table("employees").select("*").execute().data
+    employees = supabase.table("employees") \
+        .select("name, email, working_days, absent_days") \
+        .execute().data
 
     if not employees:
         return "No employee records found."
 
     alerts = []
     for e in employees:
-        # ✅ Fix #4: Guard against division by zero
-        if TOTAL_WORKING_DAYS > 0:
-            attendance_rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100
-        else:
-            attendance_rate = 0.0
-
-        if e["absent_days"] > 3 or attendance_rate < 80:
+        rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100 if TOTAL_WORKING_DAYS > 0 else 0.0
+        if e["absent_days"] > 3 or rate < 80:
             alerts.append(
-                f"⚠ {e['name'].title()} → Absent: {e['absent_days']} day(s) | "
-                f"Attendance: {attendance_rate:.1f}%"
+                f"  ⚠  {e['name'].title()} ({e['email']}) "
+                f"→ Absent: {e['absent_days']} day(s) | Attendance: {rate:.1f}%"
             )
 
     if not alerts:
@@ -406,28 +505,26 @@ def detect_absenteeism() -> str:
 @tool
 def hr_summary() -> str:
     """
-    Generate HR dashboard summary including employee stats,
+    Generate HR dashboard summary including workforce stats,
     leave request counts, and absenteeism overview.
-    ✅ Fix #7: Expanded to be a genuinely useful dashboard.
     """
-    employees = supabase.table("employees").select("*").execute().data
+    employees = supabase.table("employees") \
+        .select("name, email, working_days, absent_days") \
+        .execute().data
 
     all_leaves = supabase.table("leave_requests").select("status").execute().data
-    pending   = sum(1 for l in all_leaves if l["status"] == "pending")
-    approved  = sum(1 for l in all_leaves if l["status"] == "approved")
-    rejected  = sum(1 for l in all_leaves if l["status"] == "rejected")
 
-    # Absenteeism stats
+    pending  = sum(1 for l in all_leaves if l["status"] == "pending")
+    approved = sum(1 for l in all_leaves if l["status"] == "approved")
+    rejected = sum(1 for l in all_leaves if l["status"] == "rejected")
+
     flagged = []
     total_absent = 0
     for e in employees:
         total_absent += e.get("absent_days", 0)
-        if TOTAL_WORKING_DAYS > 0:
-            rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100
-        else:
-            rate = 0.0
+        rate = (e["working_days"] / TOTAL_WORKING_DAYS) * 100 if TOTAL_WORKING_DAYS > 0 else 0.0
         if e.get("absent_days", 0) > 3 or rate < 80:
-            flagged.append(e["name"].title())
+            flagged.append(f"{e['name'].title()} ({e['email']})")
 
     avg_absent = (total_absent / len(employees)) if employees else 0
 
@@ -445,13 +542,15 @@ def hr_summary() -> str:
    Rejected            : {rejected}
    Total               : {len(all_leaves)}
 
-📊 Attendance (this month, out of {TOTAL_WORKING_DAYS} working days)
+📊 Attendance  (this month, out of {TOTAL_WORKING_DAYS} working days)
    Avg Absent Days     : {avg_absent:.1f}
    Employees Flagged   : {len(flagged)}
 """
 
     if flagged:
-        summary += "   Flagged Employees  : " + ", ".join(flagged) + "\n"
+        summary += "   Flagged             :\n"
+        for f in flagged:
+            summary += f"     • {f}\n"
     else:
         summary += "   Flagged Employees  : None ✅\n"
 

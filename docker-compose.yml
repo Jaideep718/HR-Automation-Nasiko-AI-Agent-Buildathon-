@@ -14,7 +14,7 @@
 
 services:
 
-  # ── HR HELPDESK (DeepSeek-V3 via HuggingFace) ────────────────────────────
+  # ── HR HELPDESK (GPT-4o) ─────────────────────────────────────────────────
 
   hr-helpdesk-agent:
     build:
@@ -22,10 +22,8 @@ services:
       dockerfile: hr-helpdesk-agent/Dockerfile
     container_name: hr-helpdesk-agent
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - HF_TOKEN=${HF_TOKEN}
-      - HF_BASE_URL=${HF_BASE_URL}
-      - LLM_MODEL=${HF_LLM_MODEL}
+      - OPENAI_API_KEY=${HELPDESK_OPENAI_API_KEY}
+      - LLM_MODEL=${LLM_MODEL}
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_INDEX=${PINECONE_INDEX}
       - PINECONE_FAQ_INDEX=${PINECONE_FAQ_INDEX}
@@ -160,10 +158,8 @@ services:
       dockerfile: payroll-agent/Dockerfile
     container_name: payroll-agent
     environment:
-      - OPENAI_API_KEY=${PAYROLL_OPENAI_API_KEY}
-      - HF_TOKEN=${HF_TOKEN}
-      - HF_BASE_URL=${HF_BASE_URL}
-      - LLM_MODEL=${HF_LLM_MODEL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=${LLM_MODEL}
       - SUPABASE_URL=${PAYROLL_SUPABASE_URL}
       - SUPABASE_KEY=${PAYROLL_SUPABASE_KEY}
     ports:
@@ -178,7 +174,7 @@ services:
       retries: 3
       start_period: 30s
 
-  # ── ORCHESTRATOR (DeepSeek-V3 via HuggingFace) ── single entry point ─────
+  # ── ORCHESTRATOR (GPT-4o) ── single entry point ──────────────────────────
 
   master-orchestrator-agent:
     build:
@@ -187,9 +183,7 @@ services:
     container_name: master-orchestrator-agent
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - HF_TOKEN=${HF_TOKEN}
-      - HF_BASE_URL=${HF_BASE_URL}
-      - LLM_MODEL=${HF_LLM_MODEL}
+      - LLM_MODEL=${LLM_MODEL}
       - HR_HELPDESK_URL=http://hr-helpdesk-agent:5000
       - ONBOARDING_AGENT_URL=http://onboarding-agent:5000
       - RESUME_SHORTLIST_URL=http://resume-shortlisting-agent:5000

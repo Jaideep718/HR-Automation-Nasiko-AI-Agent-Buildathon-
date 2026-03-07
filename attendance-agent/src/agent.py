@@ -6,7 +6,6 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from dotenv import load_dotenv
 
-# ✅ Fix #9: Load .env variables at startup
 load_dotenv()
 
 from tools import (
@@ -16,7 +15,9 @@ from tools import (
     reject_leave,
     reject_leave_by_number,
     track_working_days,
+    track_working_days_by_email,       # ✅ email-based fallback
     monitor_absenteeism,
+    monitor_absenteeism_by_email,      # ✅ email-based fallback
     get_attendance_report,
     detect_absenteeism,
     hr_summary,
@@ -36,7 +37,9 @@ class Agent:
             reject_leave,
             reject_leave_by_number,
             track_working_days,
+            track_working_days_by_email,
             monitor_absenteeism,
+            monitor_absenteeism_by_email,
             get_attendance_report,
             detect_absenteeism,
             hr_summary,
@@ -56,7 +59,7 @@ Your responsibilities include:
 2. Approving leave requests
 3. Rejecting leave requests
 4. Sending email notifications (handled automatically by the tools)
-5. Tracking employee attendance
+5. Tracking employee working days
 6. Monitoring absenteeism
 7. Generating attendance reports
 8. Detecting poor attendance
@@ -65,10 +68,21 @@ Your responsibilities include:
 Rules:
 - Always use tools when performing HR operations.
 - Never fabricate employee information.
-- If multiple employees have the same name, ask HR which numbered request to use.
-  Direct them to first run view_leave_requests to see the numbered list.
-- If HR provides a request number (e.g., "approve request 2"), use
-  approve_leave_by_number or reject_leave_by_number.
+- Employee primary key is their EMAIL — always use email to uniquely identify an employee.
+
+Handling duplicate names (leave requests):
+- If multiple employees share the same name in leave requests, ask HR to run
+  'view leave requests' first to see the numbered list, then use
+  approve_leave_by_number or reject_leave_by_number with the correct number.
+
+Handling duplicate names (attendance / absenteeism):
+- If track_working_days or monitor_absenteeism returns multiple employees
+  with the same name, show the disambiguation list (which includes each employee's email).
+- Ask HR to confirm which email belongs to the employee they mean.
+- Then use track_working_days_by_email or monitor_absenteeism_by_email
+  with the confirmed email.
+
+General:
 - If HR provides a reason when rejecting a leave request, pass the reason to the rejection tool.
 - HR may refer to previous results using phrases like "first", "second", or "that request".
 - Always report back whether email notifications were sent successfully.
@@ -88,9 +102,6 @@ Rules:
             handle_parsing_errors=True,
         )
 
-        # ✅ Fix #10: Use RunnableWithMessageHistory instead of the
-        # deprecated ConversationBufferMemory. Each session_id gets its
-        # own independent in-memory history store.
         self._session_store: dict[str, BaseChatMessageHistory] = {}
 
         self.agent_with_history = RunnableWithMessageHistory(
@@ -113,8 +124,7 @@ Rules:
         Args:
             message_text: The HR manager's message.
             session_id:   Conversation session identifier. Use different
-                          session IDs to maintain separate conversations
-                          (e.g. per user or per browser tab).
+                          session IDs to maintain separate conversations.
         """
         result = self.agent_with_history.invoke(
             {"input": message_text},
