@@ -42,7 +42,12 @@ Other tasks you can handle:
 - schedule_orientation: Only call this if explicitly asked AND all documents are uploaded
 
 Always use the employee_id returned by create_employee_profile (e.g. EMP-1001) for all subsequent tool calls for that employee.
-Be concise and confirm each completed step."""
+Be concise and confirm each completed step.
+
+COMMUNICATION RULES:
+- NEVER ask follow-up questions like "Would you like me to proceed?", "Should I continue?", "Can I help with anything else?"
+- Execute the requested action directly and provide the result
+- If required information is missing (name, email, role, department), state what is needed and stop"""
 
 
 class Agent:

@@ -1,0 +1,33 @@
+services:
+  payroll-agent:
+    build: .
+    container_name: payroll-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    stdin_open: true
+    ports:
+      - "5003:5003"
+    tty: true
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:5003/health')",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  agents-net:
+    external: true

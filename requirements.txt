@@ -25,6 +25,7 @@ httpx
 # Web framework
 fastapi
 uvicorn
+python-multipart
 click
 
 # Data & config
@@ -38,3 +39,7 @@ pandas
 requests
 pypdf
 openai
+
+google-api-python-client>=2.0.0
+google-auth>=2.0.0
+google-auth-oauthlib>=1.0.0

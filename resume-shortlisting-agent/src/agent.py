@@ -153,6 +153,11 @@ Candidate Name
 Score
 Status (Shortlisted / Rejected)
 Interview time if shortlisted
+
+COMMUNICATION RULES:
+- NEVER ask follow-up questions like "Would you like me to proceed?", "Should I continue?", "Can I help with anything else?"
+- Execute the entire workflow automatically and provide the complete result
+- Do not pause for confirmation between steps
 """
 
         # Create agent using LangGraph (LangChain 1.x compatible)

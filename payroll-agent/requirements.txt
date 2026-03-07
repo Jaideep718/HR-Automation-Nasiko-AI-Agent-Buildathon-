@@ -1,0 +1,11 @@
+langchain-openai
+langchain-core
+langchain
+langchain-community
+langgraph
+fastapi
+uvicorn
+click
+pydantic
+python-dotenv
+supabase
