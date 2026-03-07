@@ -8,10 +8,12 @@ import random
 import requests
 import pandas as pd
 
+from dotenv import load_dotenv
 from pypdf import PdfReader
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 
+load_dotenv()
 
 # ---------- LLM INITIALIZATION ----------
 
@@ -270,7 +272,7 @@ def filter_candidates(candidate_json: str, threshold: int = 6) -> str:
             candidate["status"] = "rejected"
 
         if not candidate.get("email_sent"):
-            send_interview_email(json.dumps(candidate))
+            send_interview_email.invoke(json.dumps(candidate))
             candidate["email_sent"] = True
 
         return json.dumps(candidate)
@@ -316,7 +318,7 @@ def schedule_interview(candidate_json: str) -> str:
     INTERVIEW_COUNTER += 1
 
     if not candidate.get("email_sent"):
-        send_interview_email(json.dumps(candidate))
+        send_interview_email.invoke(json.dumps(candidate))
     candidate["email_sent"] = True
 
     return json.dumps(candidate)

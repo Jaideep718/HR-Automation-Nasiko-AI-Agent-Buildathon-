@@ -4,9 +4,11 @@ Core agent logic for Resume Shortlisting and Interview Scheduling Agent.
 
 from typing import List, Dict, Any
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.agents import AgentExecutor, create_tool_calling_agent
+from langgraph.prebuilt import create_react_agent
 
 # Import tools (you will define these in tools.py)
 from tools import (
@@ -114,10 +116,7 @@ class Agent:
 # MessagesPlaceholder(variable_name="agent_scratchpad"),
 # ])
 
-        prompt = ChatPromptTemplate.from_messages([
-    (
-"system",
-"""
+        system_prompt = """
 You are an AI HR recruitment assistant.
 
 Your task is to automatically shortlist candidates for a given job role
@@ -155,29 +154,17 @@ Score
 Status (Shortlisted / Rejected)
 Interview time if shortlisted
 """
-),
 
-("user", "{input}"),
-MessagesPlaceholder(variable_name="agent_scratchpad"),
-    ])
-        # Create tool calling agent
-        agent = create_tool_calling_agent(
-            self.llm,
-            self.tools,
-            prompt
-        )
-
-        # Agent executor
-        self.agent_executor = AgentExecutor(
-            agent=agent,
+        # Create agent using LangGraph (LangChain 1.x compatible)
+        self.agent_executor = create_react_agent(
+            model=self.llm,
             tools=self.tools,
-            verbose=True,
-            max_iterations=30
+            prompt=system_prompt
         )
 
     def process_message(self, message_text: str) -> str:
         """
         Process incoming message and return agent response.
         """
-        result = self.agent_executor.invoke({"input": message_text})
-        return result["output"]
+        result = self.agent_executor.invoke({"messages": [("user", message_text)]})
+        return result["messages"][-1].content

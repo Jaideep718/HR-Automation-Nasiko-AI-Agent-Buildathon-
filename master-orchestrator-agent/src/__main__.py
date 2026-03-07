@@ -138,7 +138,7 @@ async def handle_rpc(request: JsonRpcRequest):
 
 @click.command()
 @click.option("--host", default="0.0.0.0", help="Host to bind to")
-@click.option("--port", default=5000, help="Port to bind to")
+@click.option("--port", default=8000, help="Port to bind to")
 def main(host: str, port: int):
     """Start the HR Master Orchestrator Agent server."""
     logger.info(f"Starting HR Master Orchestrator Agent on {host}:{port}")

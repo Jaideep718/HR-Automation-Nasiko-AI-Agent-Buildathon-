@@ -2,15 +2,15 @@
   "protocolVersion": "0.2.9",
   "name": "HR Master Orchestrator Agent",
   "description": "Master orchestrator agent that intelligently routes HR requests to specialized worker agents. Manages HR Helpdesk (employee queries), Onboarding (new hires), Resume Shortlisting (recruitment), and Attendance Automation agents.",
-  "url": "http://localhost:5000/",
+  "url": "http://localhost:8000/",
   "preferredTransport": "JSONRPC",
   "provider": {
     "organization": "HR Automation Team",
     "url": "https://github.com/hr-automation/master-orchestrator-agent"
   },
-  "iconUrl": "http://localhost:5000/icon.png",
+  "iconUrl": "http://localhost:8000/icon.png",
   "version": "1.0.0",
-  "documentationUrl": "http://localhost:5000/docs",
+  "documentationUrl": "http://localhost:8000/docs",
   "capabilities": {
     "streaming": false,
     "pushNotifications": false,
