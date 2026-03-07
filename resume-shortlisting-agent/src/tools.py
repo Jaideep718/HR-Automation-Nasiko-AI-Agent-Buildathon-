@@ -7,6 +7,7 @@ import json
 import random
 import requests
 import pandas as pd
+import uuid
 
 from dotenv import load_dotenv
 from pypdf import PdfReader
@@ -348,7 +349,7 @@ def score_candidate(candidate_json: str, role_skills_json: str) -> str:
 
     # ---------- EXPERIENCE ----------
 
-        experience = candidate.get("experience", 0)
+    experience = candidate.get("experience", 0)
 
     if experience >= 4:
         score += 3
@@ -455,14 +456,21 @@ def schedule_interview(candidate_json: str) -> str:
         + " - "
         + interview_end.strftime("%I:%M %p")
     )
+# generate meeting link
+    meeting_id = str(uuid.uuid4())[:8]
+    candidate["meeting_link"] = f"https://meet.google.com/{meeting_id}"
 
+    print("Interview scheduled:", candidate["name"], candidate["interview_time"])
+    print("Meeting link:", candidate["meeting_link"])
     # increment counter for next candidate
     INTERVIEW_COUNTER += 1
 
-    if not candidate.get("email_sent"):
-        send_interview_email.invoke(json.dumps(candidate))
+    # if not candidate.get("email_sent"):
+    #     send_interview_email.invoke(json.dumps(candidate))
+    # candidate["email_sent"] = True
+    send_interview_email.invoke(json.dumps(candidate))
     candidate["email_sent"] = True
-
+    print("Interview scheduled:", candidate["name"], candidate["interview_time"])
     return json.dumps(candidate)
 
 
@@ -499,6 +507,8 @@ def send_interview_email(candidate_json: str) -> str:
         return f"No email found for candidate {candidate.get('name','Unknown')}"
 
     status = candidate.get("status", "rejected")
+    if status == "shortlisted" and not candidate.get("interview_time"):
+        return "Interview not scheduled yet."
 
     # ---------- SHORTLISTED EMAIL ----------
     if status == "shortlisted":
@@ -520,6 +530,11 @@ def send_interview_email(candidate_json: str) -> str:
 <li><b>Role:</b> {candidate.get("job_role","Position")}</li>
 <li><b>Time:</b> {candidate.get("interview_time")}</li>
 <li><b>Duration:</b> 30 minutes</li>
+<li><b>Meeting Link:</b> 
+<a href="{candidate.get("meeting_link")}">
+{candidate.get("meeting_link")}
+</a>
+</li>
 </ul>
 
 <p>Please be available at the scheduled time.</p>

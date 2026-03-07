@@ -1,0 +1,30 @@
+# Git
+.git
+.gitignore
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python caches & virtual envs
+__pycache__
+*.pyc
+*.pyo
+**/__pycache__
+**/venv
+**/.venv
+
+# OS junk
+.DS_Store
+__MACOSX
+
+# Non-agent dirs
+a2a-translator
+agent-template
+sample-weather-agent
+
+# Docs & misc
+*.pdf
+*.md
+questions.txt

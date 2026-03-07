@@ -1,45 +1,43 @@
 # Combined requirements for all HR Automation agents
-# Install once: pip install -r requirements.txt
+# Shared across all Dockerfiles – single install layer.
 
-# LangChain core
-langchain-openai
-langchain-core
+# ── LangChain + LangGraph ──────────────────────────────────────────────────
 langchain
+langchain-core
+langchain-openai
 langchain-community
 langchain-pinecone
 langchain-huggingface
-
-# LangGraph (for agent loops)
 langgraph
 
-# Vector DB & Embeddings
+# ── Vector DB & Embeddings (helpdesk) ──────────────────────────────────────
 pinecone-client
 sentence-transformers
 
-# Document parsing
+# ── Document parsing (helpdesk + resume) ───────────────────────────────────
 pymupdf
+pypdf
 
-# HTTP client (for master orchestrator routing)
+# ── HTTP (orchestrator + resume) ───────────────────────────────────────────
 httpx
+requests
 
-# Web framework
+# ── Web framework ─────────────────────────────────────────────────────────
 fastapi
 uvicorn
 python-multipart
 click
 
-# Data & config
+# ── Data & config ─────────────────────────────────────────────────────────
 pydantic
 python-dotenv
-
-# Database
-supabase
-
 pandas
-requests
-pypdf
 openai
 
-google-api-python-client>=2.0.0
-google-auth>=2.0.0
-google-auth-oauthlib>=1.0.0
+# ── Database ──────────────────────────────────────────────────────────────
+supabase
+
+# ── Google APIs (onboarding) ──────────────────────────────────────────────
+google-api-python-client
+google-auth
+google-auth-oauthlib

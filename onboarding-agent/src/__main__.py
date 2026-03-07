@@ -28,6 +28,10 @@ app = FastAPI()
 # Initialize the agent
 agent = Agent()
 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 # ---------------------------------------------------------------------------
 # Background: Auto-send document reminders
 # ---------------------------------------------------------------------------

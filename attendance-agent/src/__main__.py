@@ -22,6 +22,10 @@ app = FastAPI()
 # Initialize the agent
 agent = Agent()
 
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 @app.post("/")
 async def handle_rpc(request: JsonRpcRequest):
     """Handle JSON-RPC requests."""

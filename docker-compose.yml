@@ -1,0 +1,227 @@
+# HR Automation – Full stack.
+# Run from repo root:  docker compose up --build
+#
+# Requires a .env file in the same directory (copy .env.example and fill in).
+#
+# Port layout (host):
+#   5000 — Master Orchestrator  ← single entry point for all prompts
+#   5001 — HR Helpdesk Agent
+#   5002 — Onboarding Agent
+#   5003 — Resume Shortlisting Agent
+#   5004 — Attendance Agent
+#   5005 — Offboarding Agent
+#   5006 — Payroll Agent
+
+services:
+
+  # ── HR HELPDESK (DeepSeek-V3 via HuggingFace) ────────────────────────────
+
+  hr-helpdesk-agent:
+    build:
+      context: .
+      dockerfile: hr-helpdesk-agent/Dockerfile
+    container_name: hr-helpdesk-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${HF_LLM_MODEL}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_INDEX=${PINECONE_INDEX}
+      - PINECONE_FAQ_INDEX=${PINECONE_FAQ_INDEX}
+      - SUPABASE_URL=${HELPDESK_SUPABASE_URL}
+      - SUPABASE_KEY=${HELPDESK_SUPABASE_KEY}
+      - SMTP_USER=${HELPDESK_SMTP_USER}
+      - SMTP_PASSWORD=${HELPDESK_SMTP_PASSWORD}
+    ports:
+      - "5001:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── ONBOARDING (GPT-4o) ──────────────────────────────────────────────────
+
+  onboarding-agent:
+    build:
+      context: .
+      dockerfile: onboarding-agent/Dockerfile
+    container_name: onboarding-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=gpt-4o
+      - SUPABASE_URL=${ONBOARD_SUPABASE_URL}
+      - SUPABASE_KEY=${ONBOARD_SUPABASE_KEY}
+      - SUPABASE_STORAGE_BUCKET=${SUPABASE_STORAGE_BUCKET}
+      - SMTP_EMAIL=${ONBOARD_SMTP_EMAIL}
+      - SMTP_PASSWORD=${ONBOARD_SMTP_PASSWORD}
+      - REMINDER_DAYS=${REMINDER_DAYS}
+      - HR_EMAIL=${HR_EMAIL}
+    ports:
+      - "5002:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── RESUME SHORTLISTING (GPT-4o) ─────────────────────────────────────────
+
+  resume-shortlisting-agent:
+    build:
+      context: .
+      dockerfile: resume-shortlisting-agent/Dockerfile
+    container_name: resume-shortlisting-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=gpt-4o
+      - SMTP_EMAIL=${RESUME_SMTP_EMAIL}
+      - SMTP_PASSWORD=${RESUME_SMTP_PASSWORD}
+    ports:
+      - "5003:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── ATTENDANCE (GPT-4o) ──────────────────────────────────────────────────
+
+  attendance-agent:
+    build:
+      context: .
+      dockerfile: attendance-agent/Dockerfile
+    container_name: attendance-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=gpt-4o
+      - SUPABASE_URL=${ATTENDANCE_SUPABASE_URL}
+      - SUPABASE_KEY=${ATTENDANCE_SUPABASE_KEY}
+      - EMAIL_USER=${ATTENDANCE_EMAIL_USER}
+      - EMAIL_PASS=${ATTENDANCE_EMAIL_PASS}
+    ports:
+      - "5004:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── OFFBOARDING (GPT-4o) ─────────────────────────────────────────────────
+
+  offboarding-agent:
+    build:
+      context: .
+      dockerfile: offboarding-agent/Dockerfile
+    container_name: offboarding-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=gpt-4o
+      - SUPABASE_URL=${ONBOARD_SUPABASE_URL}
+      - SUPABASE_KEY=${ONBOARD_SUPABASE_KEY}
+      - SMTP_EMAIL=${ONBOARD_SMTP_EMAIL}
+      - SMTP_PASSWORD=${ONBOARD_SMTP_PASSWORD}
+      - HR_EMAIL=${HR_EMAIL}
+      - COMPANY_NAME=${COMPANY_NAME}
+    ports:
+      - "5005:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+
+  # ── PAYROLL (GPT-4o) ─────────────────────────────────────────────────────
+
+  payroll-agent:
+    build:
+      context: .
+      dockerfile: payroll-agent/Dockerfile
+    container_name: payroll-agent
+    environment:
+      - OPENAI_API_KEY=${PAYROLL_OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${HF_LLM_MODEL}
+      - SUPABASE_URL=${PAYROLL_SUPABASE_URL}
+      - SUPABASE_KEY=${PAYROLL_SUPABASE_KEY}
+    ports:
+      - "5006:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── ORCHESTRATOR (DeepSeek-V3 via HuggingFace) ── single entry point ─────
+
+  master-orchestrator-agent:
+    build:
+      context: .
+      dockerfile: master-orchestrator-agent/Dockerfile
+    container_name: master-orchestrator-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - HF_TOKEN=${HF_TOKEN}
+      - HF_BASE_URL=${HF_BASE_URL}
+      - LLM_MODEL=${HF_LLM_MODEL}
+      - HR_HELPDESK_URL=http://hr-helpdesk-agent:5000
+      - ONBOARDING_AGENT_URL=http://onboarding-agent:5000
+      - RESUME_SHORTLIST_URL=http://resume-shortlisting-agent:5000
+      - ATTENDANCE_AGENT_URL=http://attendance-agent:5000
+      - OFFBOARDING_AGENT_URL=http://offboarding-agent:5000
+      - PAYROLL_AGENT_URL=http://payroll-agent:5000
+      - AGENT_TIMEOUT=${AGENT_TIMEOUT}
+    ports:
+      - "5000:5000"
+    networks:
+      - agents-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      hr-helpdesk-agent:
+        condition: service_healthy
+      onboarding-agent:
+        condition: service_healthy
+      resume-shortlisting-agent:
+        condition: service_healthy
+      attendance-agent:
+        condition: service_healthy
+      offboarding-agent:
+        condition: service_healthy
+      payroll-agent:
+        condition: service_healthy
+
+networks:
+  agents-net:
+    driver: bridge
