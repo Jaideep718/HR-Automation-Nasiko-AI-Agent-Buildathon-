@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+click
+langchain
+langchain-core
+langchain-openai
+openai
+pypdf
+pandas
+requests
+python-dotenv
+httpx
