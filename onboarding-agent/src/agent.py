@@ -46,7 +46,8 @@ Be concise and confirm each completed step.
 
 CRITICAL: NEVER ask the user for more information or clarification. There is no multi-turn conversation.
 All required data MUST be in the original message. If a field is missing, use a reasonable default or skip that step.
-Do NOT ask follow-up questions under any circumstances."""
+NEVER ask follow-up questions like "Would you like me to proceed?", "Should I continue?", "Can I help with anything else?"
+Execute the requested action directly and provide the result."""
 
 
 class Agent:

@@ -1,0 +1,60 @@
+{
+  "protocolVersion": "0.2.9",
+  "name": "Payroll Automation Agent",
+  "description": "An AI-powered payroll automation agent that manages the complete payroll process for employees. Handles salary calculations, payslip generation, tax deductions, bonus processing, and payroll reports. Integrates with employee database and attendance records to compute accurate monthly compensation.",
+  "url": "http://localhost:5003/",
+  "preferredTransport": "JSONRPC",
+  "provider": {
+    "organization": "HR Automation Team",
+    "url": "https://github.com/hr-automation/payroll-agent"
+  },
+  "iconUrl": "http://localhost:5003/icon.png",
+  "version": "1.0.0",
+  "documentationUrl": "http://localhost:5003/docs",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": true,
+    "chat_agent": true
+  },
+  "securitySchemes": {},
+  "security": [],
+  "skills": [
+    {
+      "id": "payroll-calculation",
+      "name": "Payroll Calculation",
+      "description": "Calculate monthly payroll for individual employees including base salary, HRA, DA, allowances, overtime, and all applicable deductions."
+    },
+    {
+      "id": "department-payroll",
+      "name": "Department Payroll Processing",
+      "description": "Process payroll for all employees in a department at once, generating payroll records and summaries."
+    },
+    {
+      "id": "payslip-generation",
+      "name": "Payslip Generation",
+      "description": "Generate detailed, formatted payslips for employees showing all earnings, deductions, and net salary."
+    },
+    {
+      "id": "payroll-summary",
+      "name": "Payroll Summary & Reports",
+      "description": "Generate company-wide payroll summaries with department-wise breakdown, totals, and statistics."
+    },
+    {
+      "id": "bonus-adjustment",
+      "name": "Bonus & Adjustment Processing",
+      "description": "Add bonuses, overtime payments, or other adjustments to employee payroll records."
+    },
+    {
+      "id": "employee-lookup",
+      "name": "Employee Information",
+      "description": "Retrieve employee details including salary structure, department, and bank information."
+    },
+    {
+      "id": "payroll-status",
+      "name": "Payroll Status Tracking",
+      "description": "Track the status of payroll processing for employees and departments."
+    }
+  ],
+  "supportsAuthenticatedExtendedCard": false
+}
