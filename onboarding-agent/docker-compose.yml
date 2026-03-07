@@ -4,6 +4,12 @@ services:
     container_name: onboarding-agent
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=${LLM_MODEL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - SMTP_EMAIL=${SMTP_EMAIL}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - REMINDER_DAYS=${REMINDER_DAYS}
     stdin_open: true
     ports:
       - "5000"

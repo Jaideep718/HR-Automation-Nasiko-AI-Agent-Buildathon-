@@ -1,9 +1,10 @@
 services:
-  weather-assistant:
+  resume-shortlisting-agent:
     build: .
-    container_name: weather-assistant
+    container_name: resume-shortlisting-agent
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LLM_MODEL=${LLM_MODEL}
     stdin_open: true
     ports:
       - "5000"
