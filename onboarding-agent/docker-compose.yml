@@ -1,0 +1,16 @@
+services:
+  onboarding-agent:
+    build: .
+    container_name: onboarding-agent
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    stdin_open: true
+    ports:
+      - "5000"
+    tty: true
+    networks:
+      - agents-net
+
+networks:
+  agents-net:
+    external: true
