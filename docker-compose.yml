@@ -61,6 +61,9 @@ services:
       - REMINDER_DAYS=${REMINDER_DAYS}
       - HR_EMAIL=${HR_EMAIL}
       - UPLOAD_BASE_URL=http://localhost:5002/onboarding/upload
+    volumes:
+      - ./onboarding-agent/src/credentials.json:/app/credentials.json:ro
+      - ./onboarding-agent/src/token.json:/app/token.json
     ports:
       - "5002:5000"
     networks:
