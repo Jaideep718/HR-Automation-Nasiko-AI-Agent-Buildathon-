@@ -6,6 +6,8 @@
 .env
 .env.*
 !.env.example
+**/credentials.json
+**/token.json
 
 # Python caches & virtual envs
 __pycache__
