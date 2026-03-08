@@ -56,6 +56,9 @@ desktop.ini
 __MACOSX/
 ._*
 *.pdf
+*.mp4
+*.mov
+*.avi
 
 # Hackathon template files (not part of our project)
 a2a-translator/
