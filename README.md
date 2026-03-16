@@ -6,7 +6,7 @@ Multi-agent HR automation system built with LangChain, LangGraph, and FastAPI.
 
 ## Agents
 
-| Agent | Port | Description |
+| Agent | Port | Description|
 |---|---|---|
 | Master Orchestrator | 5000 | Routes prompts to the correct agent |
 | HR Helpdesk | 5001 | Policy Q&A (RAG) + ticket escalation |
